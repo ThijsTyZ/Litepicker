@@ -2,7 +2,7 @@ import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
-export interface ICalendarOptions {
+export interface CalendarOptions {
   element?: HTMLInputElement|null;
   elementEnd?: HTMLInputElement|null;
   parentEl?: HTMLElement|string|null;
@@ -85,7 +85,7 @@ export interface ICalendarOptions {
 }
 
 export class Calendar {
-  public options: ICalendarOptions = {
+  public options: CalendarOptions = {
     firstDay: 1,
     format: 'YYYY-MM-DD',
     lang: 'en-US',

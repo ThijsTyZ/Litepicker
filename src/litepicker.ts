@@ -1,4 +1,4 @@
-import {Calendar, ICalendarOptions} from './calendar';
+import {Calendar, CalendarOptions} from './calendar';
 import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
@@ -9,7 +9,7 @@ export class Litepicker extends Calendar {
 
   private readonly pluralSelector: ((arg: number) => string)|null = null;
 
-  constructor(options: ICalendarOptions) {
+  constructor(options: CalendarOptions) {
     super();
 
     this.options = { ...this.options, ...options };

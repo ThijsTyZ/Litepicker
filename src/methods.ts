@@ -4,7 +4,6 @@ import * as style from './scss/main.scss';
 import { getOrientation, isMobile } from './utils';
 
 declare module './litepicker' {
-  // tslint:disable-next-line: interface-name
   interface Litepicker {
     show(element?: HTMLElement): void;
     hide(): void;

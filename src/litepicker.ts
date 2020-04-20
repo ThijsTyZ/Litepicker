@@ -4,7 +4,7 @@ import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
 export class Litepicker extends Calendar {
-  public triggerElement: Element|null = null;
+  public triggerElement?: Element|null = null;
   public backdrop: HTMLDivElement|null = null;
 
   private readonly pluralSelector: ((arg: number) => string)|null = null;
@@ -18,24 +18,24 @@ export class Litepicker extends Calendar {
       this.options.allowRepick = false;
     }
 
-    if (this.options.lockDays.length) {
+    if (this.options.lockDays?.length) {
       this.options.lockDays = DateTime.convertArray(
         this.options.lockDays,
-        this.options.lockDaysFormat,
+        this.options.lockDaysFormat || '',
       );
     }
 
-    if (this.options.bookedDays.length) {
+    if (this.options.bookedDays?.length) {
       this.options.bookedDays = DateTime.convertArray(
         this.options.bookedDays,
-        this.options.bookedDaysFormat,
+        this.options.bookedDaysFormat || '',
       );
     }
 
-    if (this.options.highlightedDays.length) {
+    if (this.options.highlightedDays?.length) {
       this.options.highlightedDays = DateTime.convertArray(
         this.options.highlightedDays,
-        this.options.highlightedDaysFormat,
+        this.options.highlightedDaysFormat || '',
       );
     }
 
@@ -80,16 +80,16 @@ export class Litepicker extends Calendar {
     }
 
     if (this.options.singleMode && !(this.options.startDate instanceof DateTime)) {
-      this.options.startDate = null;
+      this.options.startDate = undefined;
     }
     if (!this.options.singleMode
       && (!(this.options.startDate instanceof DateTime)
           || !(this.options.endDate instanceof DateTime))) {
-      this.options.startDate = null;
-      this.options.endDate = null;
+      this.options.startDate = undefined;
+      this.options.endDate = undefined;
     }
 
-    for (let idx = 0; idx < this.options.numberOfMonths; idx += 1) {
+    for (let idx = 0; idx < (this.options.numberOfMonths || 1); idx += 1) {
       const date = this.options.startDate instanceof DateTime
         ? this.options.startDate.clone()
         : new DateTime();
@@ -142,14 +142,20 @@ export class Litepicker extends Calendar {
       if (this.options.parentEl instanceof HTMLElement) {
         this.options.parentEl.appendChild(this.picker);
       } else {
-        document.querySelector(this.options.parentEl).appendChild(this.picker);
+        const el = document.querySelector(this.options.parentEl);
+        if (el) {
+          el.appendChild(this.picker);
+        }
       }
     } else {
       if (this.options.inlineMode) {
         if (this.options.element instanceof HTMLInputElement) {
-          this.options.element.parentNode.appendChild(this.picker);
+          if (this.options.element.parentNode) {
+            this.options.element.parentNode.appendChild(this.picker);
+          }
         } else {
-          this.options.element.appendChild(this.picker);
+            // @ts-ignore
+          if (this.options.element) this.options.element.appendChild(this.picker);
         }
       } else {
         document.body.appendChild(this.picker);
@@ -219,9 +225,9 @@ export class Litepicker extends Calendar {
           new DateTime(this.options.element.value),
         ];
       }
-    } else if (/\s\-\s/.test(this.options.element.value)) {
-      const values = this.options.element.value.split(' - ');
-      if (values.length === 2) {
+    } else if (/\s\-\s/.test((this.options.element as HTMLInputElement)?.value || '')) {
+      const values = (this.options.element as HTMLInputElement)?.value.split(' - ');
+      if (values?.length === 2) {
         return [
           new DateTime(values[0]),
           new DateTime(values[1]),
@@ -283,13 +289,13 @@ export class Litepicker extends Calendar {
 
   private shouldCheckLockDays() {
     return this.options.disallowLockDaysInRange
-      && this.options.lockDays.length
+      && this.options.lockDays?.length
       && this.datePicked.length === 2;
   }
 
   private shouldCheckBookedDays() {
     return this.options.disallowBookedDaysInRange
-      && this.options.bookedDays.length
+      && this.options.bookedDays?.length
       && this.datePicked.length === 2;
   }
 
@@ -342,8 +348,7 @@ export class Litepicker extends Calendar {
 
       if (this.shouldCheckLockDays()) {
         const inclusivity = this.options.lockDaysInclusivity;
-        const locked = this.options.lockDays
-          .filter((d: any) => {
+        const locked = this.options.lockDays?.filter((d: any) => {
             if (d instanceof Array) {
               return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
                 || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
@@ -368,8 +373,7 @@ export class Litepicker extends Calendar {
           inclusivity = '()';
         }
 
-        const booked = this.options.bookedDays
-          .filter((d: any) => {
+        const booked = this.options.bookedDays?.filter((d: any) => {
             if (d instanceof Array) {
               return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
                 || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
@@ -558,10 +562,10 @@ export class Litepicker extends Calendar {
 
     if (this.shouldAllowMouseEnter(target)) {
       if (this.shouldAllowRepick()) {
-        if (this.triggerElement === this.options.element) {
+        if (this.triggerElement === this.options.element && this.options.endDate) {
           this.datePicked[0] = this.options.endDate.clone();
-        } else if (this.triggerElement === this.options.elementEnd) {
-          this.datePicked[0] = this.options.startDate.clone();
+        } else if (this.triggerElement === this.options.elementEnd && this.options.startDate) {
+          this.datePicked[0] = this.options.startDate?.clone();
         }
       }
 
@@ -622,9 +626,7 @@ export class Litepicker extends Calendar {
 
         if (days > 0 && this.pluralSelector) {
           const pluralName = this.pluralSelector(days);
-          const pluralText = this.options.tooltipText[pluralName]
-            ? this.options.tooltipText[pluralName]
-            : `[${pluralName}]`;
+          const pluralText = (this.options.tooltipText as any)[pluralName] || `[${pluralName}]`;
           const text = `${days} ${pluralText}`;
 
           this.showTooltip(target, text);

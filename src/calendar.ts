@@ -2,25 +2,106 @@ import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
+export interface ICalendarOptions {
+  element?: HTMLInputElement|null;
+  elementEnd?: HTMLInputElement|null;
+  parentEl?: HTMLElement|string|null;
+
+  firstDay: 0|1|2|3|4|5|6;
+  format: string;
+  lang?: string;
+  numberOfMonths: number;
+  numberOfColumns?: number;
+  startDate?: DateTime;
+  endDate?: DateTime;
+  zIndex?: number;
+
+  minDate?: Date;
+  maxDate?: Date;
+  minDays?: number;
+  maxDays?: number;
+  selectForward?: boolean;
+  selectBackward?: boolean;
+  splitView?: boolean;
+  inlineMode?: boolean;
+  singleMode?: boolean;
+  autoApply?: boolean;
+  allowRepick?: boolean;
+  showWeekNumbers?: boolean;
+  showTooltip?: boolean;
+  hotelMode?: boolean;
+  disableWeekends?: boolean;
+  scrollToDate?: boolean;
+  mobileFriendly?: boolean;
+  useResetBtn?: boolean;
+  footerHTML?: string;
+
+  lockDaysFormat?: string;
+  lockDays?: any[];
+  disallowLockDaysInRange?: boolean;
+  lockDaysInclusivity?: string;
+
+  bookedDaysFormat?: string;
+  bookedDays?: any[];
+  disallowBookedDaysInRange?: boolean;
+  bookedDaysInclusivity?: string;
+  anyBookedDaysAsCheckout?: boolean;
+
+  highlightedDaysFormat?: string;
+  highlightedDays?: any[];
+
+  dropdowns?: {
+    minYear: number;
+    maxYear: null;
+    months: boolean;
+    years: boolean;
+  };
+
+  buttonText?: {
+    apply: string;
+    cancel: string;
+    previousMonth: string;
+    nextMonth: string;
+    reset: string;
+  };
+  tooltipText?: {
+    one: string;
+    other: string;
+  };
+  tooltipPluralSelector?: null;
+
+  // Events
+  onShow?: () => void;
+  onHide?: () => void;
+  onSelect?: (date: Date|null, endDate?: Date|null) => void;
+  onError?: (error: string) => void;
+  onRender?: () => void;
+  onChangeMonth?: (calendar: DateTime, month: number) => void;
+  onChangeYear?: (calendar: DateTime, year: number) => void;
+  onDayHover?: (calendar: Date, day: string[]) => void;
+
+  resetBtnCallback?: (event: MouseEvent) => void;
+
+}
+
 export class Calendar {
-  public options: any = {
-    element: null,
-    elementEnd: null,
-    parentEl: null,
-    // tslint:disable-next-line: object-literal-sort-keys
+  public options: ICalendarOptions = {
+    // element: null,
+    // elementEnd: null,
+    // parentEl: null,
     firstDay: 1,
     format: 'YYYY-MM-DD',
     lang: 'en-US',
     numberOfMonths: 1,
     numberOfColumns: 1,
-    startDate: null,
-    endDate: null,
+    // startDate: null,
+    // endDate: null,
     zIndex: 9999,
 
-    minDate: null,
-    maxDate: null,
-    minDays: null,
-    maxDays: null,
+    // minDate: null,
+    // maxDate: null,
+    // minDays: null,
+    // maxDays: null,
     selectForward: false,
     selectBackward: false,
     splitView: false,
@@ -75,16 +156,16 @@ export class Calendar {
     tooltipPluralSelector: null,
 
     // Events
-    onShow: null,
-    onHide: null,
-    onSelect: null,
-    onError: null,
-    onRender: null,
-    onChangeMonth: null,
-    onChangeYear: null,
-    onDayHover: null,
-
-    resetBtnCallback: null,
+    // onShow: null,
+    // onHide: null,
+    // onSelect: null,
+    // onError: null,
+    // onRender: null,
+    // onChangeMonth: null,
+    // onChangeYear: null,
+    // onDayHover: null,
+    //
+    // resetBtnCallback: null,
   };
   public calendars: DateTime[] = [];
   public picker: HTMLElement|null = null;
@@ -109,7 +190,7 @@ export class Calendar {
 
     const startDate = this.calendars[0].clone();
     const startMonthIdx = startDate.getMonth();
-    const totalMonths = startDate.getMonth() + this.options.numberOfMonths;
+    const totalMonths = startDate.getMonth() + (this.options.numberOfMonths || 0);
 
     let calendarIdx = 0;
     // tslint:disable-next-line: prefer-for-of
@@ -159,7 +240,7 @@ export class Calendar {
 
     const monthAndYear = document.createElement('div');
 
-    if (this.options.dropdowns.months) {
+    if (this.options.dropdowns?.months) {
       const selectMonths = document.createElement('select');
       selectMonths.className = style.monthItemName;
 
@@ -168,10 +249,10 @@ export class Calendar {
         const optionMonth = new DateTime(new Date(date.getFullYear(), x, 1, 0, 0, 0));
 
         option.value = String(x);
-        option.text = optionMonth.toLocaleString(this.options.lang, { month: 'long' });
+        option.text = optionMonth.toLocaleString(this.options.lang || '', { month: 'long' });
         option.disabled = (this.options.minDate
           && optionMonth.isBefore(new DateTime(this.options.minDate), 'month'))
-          || (this.options.maxDate && optionMonth.isAfter(new DateTime(this.options.maxDate), 'month'));
+          || (this.options.maxDate && optionMonth.isAfter(new DateTime(this.options.maxDate), 'month')) || false;
         option.selected = optionMonth.getMonth() === date.getMonth();
 
         selectMonths.appendChild(option);
@@ -201,18 +282,16 @@ export class Calendar {
     } else {
       const monthName = document.createElement('strong');
       monthName.className = style.monthItemName;
-      monthName.innerHTML = date.toLocaleString(this.options.lang, { month: 'long' });
+      monthName.innerHTML = date.toLocaleString(this.options.lang || '', { month: 'long' });
       monthAndYear.appendChild(monthName);
     }
 
-    if (this.options.dropdowns.years) {
+    if (this.options.dropdowns?.years) {
       const selectYears = document.createElement('select');
       selectYears.className = style.monthItemYear;
 
       const minYear = this.options.dropdowns.minYear;
-      const maxYear = this.options.dropdowns.maxYear
-        ? this.options.dropdowns.maxYear
-        : (new Date()).getFullYear();
+      const maxYear = this.options.dropdowns.maxYear || (new Date()).getFullYear();
 
       if (date.getFullYear() > maxYear) {
         const option = document.createElement('option');
@@ -227,12 +306,12 @@ export class Calendar {
       for (let x = maxYear; x >= minYear; x -= 1) {
         const option = document.createElement('option');
         const optionYear = new DateTime(new Date(x, 0, 1, 0, 0, 0));
-        option.value = x;
-        option.text = x;
+        option.value = `${x}`;
+        option.text = `${x}`;
         option.disabled = (this.options.minDate
           && optionYear.isBefore(new DateTime(this.options.minDate), 'year'))
           || (this.options.maxDate
-              && optionYear.isAfter(new DateTime(this.options.maxDate), 'year'));
+              && optionYear.isAfter(new DateTime(this.options.maxDate), 'year')) || false;
         option.selected = date.getFullYear() === x;
 
         selectYears.appendChild(option);
@@ -269,22 +348,22 @@ export class Calendar {
     const previousMonthButton = document.createElement('a');
     previousMonthButton.href = '#';
     previousMonthButton.className = style.buttonPreviousMonth;
-    previousMonthButton.innerHTML = this.options.buttonText.previousMonth;
+    previousMonthButton.innerHTML = this.options.buttonText?.previousMonth || '';
 
     const nextMonthButton = document.createElement('a');
     nextMonthButton.href = '#';
     nextMonthButton.className = style.buttonNextMonth;
-    nextMonthButton.innerHTML = this.options.buttonText.nextMonth;
+    nextMonthButton.innerHTML = this.options.buttonText?.nextMonth || '';
 
     const resetButton = document.createElement('span');
     resetButton.className = style.resetButton;
-    resetButton.innerHTML = this.options.buttonText.reset;
+    resetButton.innerHTML = this.options.buttonText?.reset || '';
 
     monthHeader.appendChild(previousMonthButton);
     monthHeader.appendChild(monthAndYear);
     monthHeader.appendChild(nextMonthButton);
 
-    if (this.options.useResetBtn) {
+    if (this.options.useResetBtn && this.options.resetBtnCallback) {
       resetButton.addEventListener('click', this.options.resetBtnCallback);
       monthHeader.appendChild(resetButton);
     }
@@ -308,7 +387,7 @@ export class Calendar {
 
     for (let w = 1; w <= 7; w += 1) {
       // 7 days, 4 is «Thursday» (new Date(1970, 0, 1, 12, 0, 0, 0))
-      const dayIdx = 7 - 4 + this.options.firstDay + w;
+      const dayIdx = 7 - 4 + (this.options.firstDay || 0) + w;
       const weekday = document.createElement('div');
       weekday.innerHTML = this.weekdayName(dayIdx);
       weekday.title = this.weekdayName(dayIdx, 'long');
@@ -445,7 +524,7 @@ export class Calendar {
       day.classList.add(style.isLocked);
     }
 
-    if (this.options.lockDays.length) {
+    if (this.options.lockDays?.length) {
       const locked = this.options.lockDays
         .filter((d: any) => {
           if (d instanceof Array) {
@@ -460,7 +539,7 @@ export class Calendar {
       }
     }
 
-    if (this.options.highlightedDays.length) {
+    if (this.options.highlightedDays?.length) {
       const isHighlighted = this.options.highlightedDays
         .filter((d: any) => {
           if (d instanceof Array) {
@@ -476,7 +555,7 @@ export class Calendar {
     }
 
     if (this.datePicked.length <= 1
-      && this.options.bookedDays.length) {
+      && this.options.bookedDays?.length) {
       let inclusivity = this.options.bookedDaysInclusivity;
 
       if (this.options.hotelMode && this.datePicked.length === 1) {
@@ -523,14 +602,14 @@ export class Calendar {
     } else {
       footer.innerHTML = `
       <span class="${style.previewDateRange}"></span>
-      <button type="button" class="${style.buttonCancel}">${this.options.buttonText.cancel}</button>
-      <button type="button" class="${style.buttonApply}">${this.options.buttonText.apply}</button>
+      <button type="button" class="${style.buttonCancel}">${this.options.buttonText?.cancel}</button>
+      <button type="button" class="${style.buttonApply}">${this.options.buttonText?.apply}</button>
       `;
     }
 
     if (this.options.singleMode) {
       if (this.datePicked.length === 1) {
-        const startValue = this.datePicked[0].format(this.options.format, this.options.lang);
+        const startValue = this.datePicked[0].format(this.options.format || '', this.options.lang);
         const el = footer.querySelector(`.${style.previewDateRange}`);
         if (el) {
           el.innerHTML = startValue;
@@ -545,8 +624,8 @@ export class Calendar {
       }
 
       if (this.datePicked.length === 2) {
-        const startValue = this.datePicked[0].format(this.options.format, this.options.lang);
-        const endValue = this.datePicked[1].format(this.options.format, this.options.lang);
+        const startValue = this.datePicked[0].format(this.options.format || '', this.options.lang);
+        const endValue = this.datePicked[1].format(this.options.format || '', this.options.lang);
         const el = footer.querySelector(`.${style.previewDateRange}`);
         if (el) {
           el.innerHTML = `${startValue} - ${endValue}`;
@@ -559,7 +638,7 @@ export class Calendar {
 
   protected renderWeekNumber(date: DateTime) {
     const wn = document.createElement('div');
-    const week = date.getWeek(this.options.firstDay);
+    const week = date.getWeek(this.options.firstDay || 0);
     wn.className = style.weekNumber;
     wn.innerHTML = week === 53 && date.getMonth() === 0 ? '53 / 1' : `${week}`;
 
@@ -573,15 +652,14 @@ export class Calendar {
     return t;
   }
 
-  protected dateIsBooked(date: DateTime, inclusivity: string) {
-    return this.options.bookedDays
-      .filter((d: any) => {
-        if (d instanceof Array) {
-          return date.isBetween(d[0], d[1], inclusivity);
-        }
+  protected dateIsBooked(date: DateTime, inclusivity?: string) {
+    return this.options.bookedDays?.filter((d: any) => {
+      if (d instanceof Array) {
+        return date.isBetween(d[0], d[1], inclusivity);
+      }
 
-        return d.isSame(date, 'day');
-      }).length;
+      return d.isSame(date, 'day');
+    }).length;
   }
 
   private weekdayName(day: number, representation = 'short') {
@@ -590,7 +668,7 @@ export class Calendar {
   }
 
   private calcSkipDays(date: DateTime) {
-    let total = date.getDay() - this.options.firstDay;
+    let total = date.getDay() - (this.options.firstDay || 0);
     if (total < 0) total += 7;
 
     return total;

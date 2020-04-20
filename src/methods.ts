@@ -82,11 +82,11 @@ Litepicker.prototype.show = function (el: HTMLElement|null = null) {
     this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
     this.picker.style.right = '';
     this.picker.style.bottom = '';
-    this.picker.style.zIndex = this.options.zIndex;
+    this.picker.style.zIndex = `${this.options.zIndex || ''}`;
 
     if (this.backdrop) {
       this.backdrop.style.display = 'block';
-      this.backdrop.style.zIndex = `${this.options.zIndex - 1}`;
+      this.backdrop.style.zIndex = `${(this.options.zIndex || 0) - 1}`;
     }
     document.body.classList.add(style.litepickerOpen);
 
@@ -97,7 +97,7 @@ Litepicker.prototype.show = function (el: HTMLElement|null = null) {
     if (el) {
       el.blur();
     } else {
-      this.options.element.blur();
+      this.options.element?.blur();
     }
     return;
   }
@@ -106,8 +106,9 @@ Litepicker.prototype.show = function (el: HTMLElement|null = null) {
 
   this.picker.style.position = 'absolute';
   this.picker.style.display = 'block';
-  this.picker.style.zIndex = this.options.zIndex;
+  this.picker.style.zIndex = `${this.options.zIndex}`;
 
+  if (!element) return;
   const elBCR = element.getBoundingClientRect();
   const pickerBCR = this.picker.getBoundingClientRect();
 
@@ -235,7 +236,7 @@ Litepicker.prototype.setEndDate = function (date) {
     this.options.lang,
   );
 
-  if (this.options.startDate.getTime() > this.options.endDate.getTime()) {
+  if (this.options.startDate && this.options.startDate.getTime() > this.options.endDate.getTime()) {
     this.options.endDate = this.options.startDate.clone();
     this.options.startDate = new DateTime(
       date,
@@ -271,7 +272,7 @@ Litepicker.prototype.gotoDate = function (date, idx = 0) {
 Litepicker.prototype.setLockDays = function (array) {
   this.options.lockDays = DateTime.convertArray(
     array,
-    this.options.lockDaysFormat,
+    this.options.lockDaysFormat || '',
   );
   this.render();
 };
@@ -279,7 +280,7 @@ Litepicker.prototype.setLockDays = function (array) {
 Litepicker.prototype.setBookedDays = function (array) {
   this.options.bookedDays = DateTime.convertArray(
     array,
-    this.options.bookedDaysFormat,
+    this.options.bookedDaysFormat || '',
   );
   this.render();
 };
@@ -287,7 +288,7 @@ Litepicker.prototype.setBookedDays = function (array) {
 Litepicker.prototype.setHighlightedDays = function (array) {
   this.options.highlightedDays = DateTime.convertArray(
     array,
-    this.options.highlightedDaysFormat,
+    this.options.highlightedDaysFormat || '',
   );
   this.render();
 };
@@ -316,13 +317,13 @@ Litepicker.prototype.setOptions = function (options) {
   this.options = { ...this.options, ...options };
 
   if (this.options.singleMode && !(this.options.startDate instanceof Date)) {
-    this.options.startDate = null;
-    this.options.endDate = null;
+    this.options.startDate = undefined;
+    this.options.endDate = undefined;
   }
   if (!this.options.singleMode
     && (!(this.options.startDate instanceof Date) || !(this.options.endDate instanceof Date))) {
-    this.options.startDate = null;
-    this.options.endDate = null;
+    this.options.startDate = undefined;
+    this.options.endDate = undefined;
   }
 
   for (let idx = 0; idx < this.options.numberOfMonths; idx += 1) {
@@ -334,24 +335,24 @@ Litepicker.prototype.setOptions = function (options) {
     this.calendars[idx] = date;
   }
 
-  if (this.options.lockDays.length) {
+  if (this.options.lockDays?.length) {
     this.options.lockDays = DateTime.convertArray(
       this.options.lockDays,
-      this.options.lockDaysFormat,
+      this.options.lockDaysFormat || '',
     );
   }
 
-  if (this.options.bookedDays.length) {
+  if (this.options.bookedDays?.length) {
     this.options.bookedDays = DateTime.convertArray(
       this.options.bookedDays,
-      this.options.bookedDaysFormat,
+      this.options.bookedDaysFormat || '',
     );
   }
 
-  if (this.options.highlightedDays.length) {
+  if (this.options.highlightedDays?.length) {
     this.options.highlightedDays = DateTime.convertArray(
       this.options.highlightedDays,
-      this.options.highlightedDaysFormat,
+      this.options.highlightedDaysFormat || '',
     );
   }
 
@@ -365,8 +366,8 @@ Litepicker.prototype.setOptions = function (options) {
 };
 
 Litepicker.prototype.clearSelection = function () {
-  this.options.startDate = null;
-  this.options.endDate = null;
+  this.options.startDate = undefined;
+  this.options.endDate = undefined;
   this.datePicked.length = 0;
 
   this.updateInput();

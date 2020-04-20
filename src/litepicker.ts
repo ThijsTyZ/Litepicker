@@ -4,12 +4,12 @@ import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
 export class Litepicker extends Calendar {
-  protected triggerElement;
-  protected backdrop;
+  public triggerElement: Element|null = null;
+  public backdrop: HTMLDivElement|null = null;
 
-  private readonly pluralSelector: (arg: number) => string;
+  private readonly pluralSelector: ((arg: number) => string)|null = null;
 
-  constructor(options) {
+  constructor(options: any) {
     super();
 
     this.options = { ...this.options, ...options };
@@ -130,10 +130,10 @@ export class Litepicker extends Calendar {
     this.picker.addEventListener('mouseenter', e => this.onMouseEnter(e), true);
     this.picker.addEventListener('mouseleave', e => this.onMouseLeave(e), false);
     if (this.options.element instanceof HTMLElement) {
-      this.options.element.addEventListener('change', e => this.onInput(e), true);
+      this.options.element.addEventListener('change', (e: Event) => this.onInput(e), true);
     }
     if (this.options.elementEnd instanceof HTMLElement) {
-      this.options.elementEnd.addEventListener('change', e => this.onInput(e), true);
+      this.options.elementEnd.addEventListener('change', (e: Event) => this.onInput(e), true);
     }
 
     this.render();
@@ -163,7 +163,7 @@ export class Litepicker extends Calendar {
     if (this.options.mobileFriendly) {
       this.backdrop = document.createElement('div');
       this.backdrop.className = style.litepickerBackdrop;
-      this.backdrop.addEventListener('click', this.hide());
+      this.backdrop.addEventListener('click', this.hide);
       if (this.options.element && this.options.element.parentNode) {
         this.options.element.parentNode.appendChild(this.backdrop);
       }
@@ -185,9 +185,11 @@ export class Litepicker extends Calendar {
 
           this.render();
 
-          const pickerBCR = this.picker.getBoundingClientRect();
-          this.picker.style.top = `calc(50% - ${(pickerBCR.height / 2)}px)`;
-          this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
+          if (this.picker) {
+            const pickerBCR = this.picker.getBoundingClientRect();
+            this.picker.style.top = `calc(50% - ${(pickerBCR.height / 2)}px)`;
+            this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
+          }
         }
       });
     }
@@ -230,7 +232,7 @@ export class Litepicker extends Calendar {
     return [];
   }
 
-  private updateInput() {
+  public updateInput() {
     if (!(this.options.element instanceof HTMLInputElement)) return;
 
     if (this.options.singleMode && this.options.startDate) {
@@ -259,13 +261,13 @@ export class Litepicker extends Calendar {
     }
   }
 
-  private isSamePicker(el) {
+  private isSamePicker(el: Element) {
     const picker = el.closest(`.${style.litepicker}`);
 
     return picker === this.picker;
   }
 
-  private shouldShown(el) {
+  private shouldShown(el: Element) {
     return el === this.options.element
       || (this.options.elementEnd && el === this.options.elementEnd);
   }
@@ -291,7 +293,7 @@ export class Litepicker extends Calendar {
       && this.datePicked.length === 2;
   }
 
-  private onClick(e) {
+  private onClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
 
     if (!target || !this.picker) {
@@ -341,7 +343,7 @@ export class Litepicker extends Calendar {
       if (this.shouldCheckLockDays()) {
         const inclusivity = this.options.lockDaysInclusivity;
         const locked = this.options.lockDays
-          .filter((d) => {
+          .filter((d: any) => {
             if (d instanceof Array) {
               return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
                 || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
@@ -367,7 +369,7 @@ export class Litepicker extends Calendar {
         }
 
         const booked = this.options.bookedDays
-          .filter((d) => {
+          .filter((d: any) => {
             if (d instanceof Array) {
               return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
                 || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
@@ -415,8 +417,10 @@ export class Litepicker extends Calendar {
 
       if (this.options.splitView) {
         const monthItem = target.closest(`.${style.monthItem}`);
-        idx = findNestedMonthItem(monthItem);
-        numberOfMonths = 1;
+        if (monthItem) {
+          idx = findNestedMonthItem(monthItem);
+          numberOfMonths = 1;
+        }
       }
 
       this.calendars[idx].setMonth(this.calendars[idx].getMonth() - numberOfMonths);
@@ -441,8 +445,10 @@ export class Litepicker extends Calendar {
 
       if (this.options.splitView) {
         const monthItem = target.closest(`.${style.monthItem}`);
-        idx = findNestedMonthItem(monthItem);
-        numberOfMonths = 1;
+        if (monthItem) {
+          idx = findNestedMonthItem(monthItem);
+          numberOfMonths = 1;
+        }
       }
 
       this.calendars[idx].setMonth(this.calendars[idx].getMonth() + numberOfMonths);
@@ -483,7 +489,8 @@ export class Litepicker extends Calendar {
     }
   }
 
-  private showTooltip(element, text) {
+  private showTooltip(element: Element, text: string) {
+    if (!this.picker) return;
     const tooltip = this.picker.querySelector(`.${style.containerTooltip}`) as HTMLElement;
     tooltip.style.visibility = 'visible';
     tooltip.innerHTML = text;
@@ -515,6 +522,7 @@ export class Litepicker extends Calendar {
   }
 
   private hideTooltip() {
+    if (!this.picker) return;
     const tooltip = this.picker.querySelector(`.${style.containerTooltip}`) as HTMLElement;
     tooltip.style.visibility = 'hidden';
   }
@@ -536,14 +544,15 @@ export class Litepicker extends Calendar {
     return el.classList.contains(style.dayItem);
   }
 
-  private onMouseEnter(event) {
+  private onMouseEnter(event: MouseEvent) {
+    if (!this.picker) return;
     const target = event.target as HTMLElement;
     if (!this.isDayItem(target)) {
       return;
     }
 
     if (typeof this.options.onDayHover === 'function') {
-      this.options.onDayHover.call(this, DateTime.parseDateTime(target.dataset.time),
+      this.options.onDayHover.call(this, DateTime.parseDateTime(target.dataset.time || null),
                                    target.classList.value?.split(/\s/));
     }
 
@@ -573,9 +582,9 @@ export class Litepicker extends Calendar {
         isFlipped = true;
       }
       const allDayItems = this.picker.querySelectorAll(`.${style.dayItem}`);
-      const tmpArray: Element[] = new Array(allDayItems.length);
+      const tmpArray: HTMLElement[] = new Array(allDayItems.length);
       for (let i = 0; i < allDayItems.length; i = i + 1) {
-        const curElem = allDayItems.item(i);
+        const curElem = allDayItems.item(i) as HTMLElement;
         tmpArray[i] = curElem;
       }
       tmpArray.forEach((d: HTMLElement) => {
@@ -611,7 +620,7 @@ export class Litepicker extends Calendar {
           days += 1;
         }
 
-        if (days > 0) {
+        if (days > 0 && this.pluralSelector) {
           const pluralName = this.pluralSelector(days);
           const pluralText = this.options.tooltipText[pluralName]
             ? this.options.tooltipText[pluralName]
@@ -626,7 +635,7 @@ export class Litepicker extends Calendar {
     }
   }
 
-  private onMouseLeave(event) {
+  private onMouseLeave(event: MouseEvent) {
     const target = event.target as any;
 
     if (!this.options.allowRepick) {
@@ -637,7 +646,7 @@ export class Litepicker extends Calendar {
     this.render();
   }
 
-  private onKeyDown(event) {
+  private onKeyDown(event: KeyboardEvent) {
     const target = event.target as any;
 
     switch (event.code) {
@@ -683,7 +692,7 @@ export class Litepicker extends Calendar {
     }
   }
 
-  private onInput(event) {
+  private onInput(event: Event) {
     let [startValue, endValue] = this.parseInput();
 
     if (startValue instanceof Date && !isNaN(startValue.getTime())
@@ -714,7 +723,7 @@ export class Litepicker extends Calendar {
     }
   }
 
-  private isShowning() {
+  public isShowning() {
     return this.picker && this.picker.style.display !== 'none';
   }
 
@@ -723,7 +732,7 @@ export class Litepicker extends Calendar {
   // copied from
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
     if (!Object.entries) {
-      Object.entries = (obj) => {
+      Object.entries = (obj: any) => {
         const ownProps = Object.keys(obj);
         let i = ownProps.length;
         const  resArray = new Array(i); // preallocate the Array
@@ -739,16 +748,16 @@ export class Litepicker extends Calendar {
     // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill
     if (!Element.prototype.matches) {
       // tslint:disable-next-line: no-string-literal
-      Element.prototype.matches = Element.prototype['msMatchesSelector'] ||
+      Element.prototype.matches = (Element.prototype as any)['msMatchesSelector'] ||
                                     Element.prototype.webkitMatchesSelector;
     }
     if (!Element.prototype.closest) {
-      Element.prototype.closest = function (s) {
+      Element.prototype.closest = function (s: any) {
         // tslint:disable-next-line: no-this-assignment
-        let el = this;
+        let el: Element|Node & ParentNode|null = this;
 
         do {
-          if (el.matches(s)) return el;
+          if ((el as Element).matches(s)) return el;
           el = el.parentElement || el.parentNode;
         } while (el !== null && el.nodeType === 1);
         return null;

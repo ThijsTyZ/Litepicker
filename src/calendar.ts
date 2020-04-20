@@ -3,7 +3,7 @@ import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
 export class Calendar {
-  protected options: any = {
+  public options: any = {
     element: null,
     elementEnd: null,
     parentEl: null,
@@ -86,17 +86,17 @@ export class Calendar {
 
     resetBtnCallback: null,
   };
-  protected calendars: DateTime[] = [];
-  protected picker: HTMLElement;
-  protected datePicked: DateTime[] = [];
+  public calendars: DateTime[] = [];
+  public picker: HTMLElement|null = null;
+  public datePicked: DateTime[] = [];
 
-  protected render() {
+  public render() {
     const months = document.createElement('div');
     months.className = style.containerMonths;
 
-    if (style[`columns${this.options.numberOfColumns}`]) {
+    if ((style as any)[`columns${this.options.numberOfColumns}`]) {
       months.classList.remove(style.columns2, style.columns3, style.columns4);
-      months.classList.add(style[`columns${this.options.numberOfColumns}`]);
+      months.classList.add((style as any)[`columns${this.options.numberOfColumns}`]);
     }
 
     if (this.options.splitView) {
@@ -128,19 +128,21 @@ export class Calendar {
       calendarIdx += 1;
     }
 
-    this.picker.innerHTML = '';
-    this.picker.appendChild(months);
+    if (this.picker) {
+      this.picker.innerHTML = '';
+      this.picker.appendChild(months);
 
-    if (!this.options.autoApply || this.options.footerHTML) {
-      this.picker.appendChild(this.renderFooter());
-    }
+      if (!this.options.autoApply || this.options.footerHTML) {
+        this.picker.appendChild(this.renderFooter());
+      }
 
-    if (this.options.showTooltip) {
-      this.picker.appendChild(this.renderTooltip());
-    }
+      if (this.options.showTooltip) {
+        this.picker.appendChild(this.renderTooltip());
+      }
 
-    if (typeof this.options.onRender === 'function') {
-      this.options.onRender.call(this);
+      if (typeof this.options.onRender === 'function') {
+        this.options.onRender.call(this);
+      }
     }
   }
 
@@ -182,7 +184,9 @@ export class Calendar {
 
         if (this.options.splitView) {
           const monthItem = target.closest(`.${style.monthItem}`);
-          idx = findNestedMonthItem(monthItem);
+          if (monthItem) {
+            idx = findNestedMonthItem(monthItem);
+          }
         }
 
         this.calendars[idx].setMonth(Number(target.value));
@@ -237,11 +241,13 @@ export class Calendar {
       selectYears.addEventListener('change', (e) => {
         const target = e.target as HTMLSelectElement;
 
-        let idx = 0;
+        let idx: number = 0;
 
         if (this.options.splitView) {
           const monthItem = target.closest(`.${style.monthItem}`);
-          idx = findNestedMonthItem(monthItem);
+          if (monthItem) {
+            idx = findNestedMonthItem(monthItem);
+          }
         }
 
         this.calendars[idx].setFullYear(Number(target.value));
@@ -441,7 +447,7 @@ export class Calendar {
 
     if (this.options.lockDays.length) {
       const locked = this.options.lockDays
-        .filter((d) => {
+        .filter((d: any) => {
           if (d instanceof Array) {
             return date.isBetween(d[0], d[1], this.options.lockDaysInclusivity);
           }
@@ -456,7 +462,7 @@ export class Calendar {
 
     if (this.options.highlightedDays.length) {
       const isHighlighted = this.options.highlightedDays
-        .filter((d) => {
+        .filter((d: any) => {
           if (d instanceof Array) {
             return date.isBetween(d[0], d[1], '[]');
           }
@@ -525,30 +531,37 @@ export class Calendar {
     if (this.options.singleMode) {
       if (this.datePicked.length === 1) {
         const startValue = this.datePicked[0].format(this.options.format, this.options.lang);
-        footer.querySelector(`.${style.previewDateRange}`).innerHTML = startValue;
+        const el = footer.querySelector(`.${style.previewDateRange}`);
+        if (el) {
+          el.innerHTML = startValue;
+        }
       }
     } else {
       if (this.datePicked.length === 1) {
-        footer.querySelector(`.${style.buttonApply}`).setAttribute('disabled', '');
+        const el = footer.querySelector(`.${style.buttonApply}`);
+        if (el) {
+          el.setAttribute('disabled', '');
+        }
       }
 
       if (this.datePicked.length === 2) {
         const startValue = this.datePicked[0].format(this.options.format, this.options.lang);
         const endValue = this.datePicked[1].format(this.options.format, this.options.lang);
-
-        footer.querySelector(`.${style.previewDateRange}`)
-          .innerHTML = `${startValue} - ${endValue}`;
+        const el = footer.querySelector(`.${style.previewDateRange}`);
+        if (el) {
+          el.innerHTML = `${startValue} - ${endValue}`;
+        }
       }
     }
 
     return footer;
   }
 
-  protected renderWeekNumber(date) {
+  protected renderWeekNumber(date: DateTime) {
     const wn = document.createElement('div');
     const week = date.getWeek(this.options.firstDay);
     wn.className = style.weekNumber;
-    wn.innerHTML = week === 53 && date.getMonth() === 0 ? '53 / 1' : week;
+    wn.innerHTML = week === 53 && date.getMonth() === 0 ? '53 / 1' : `${week}`;
 
     return wn;
   }
@@ -560,9 +573,9 @@ export class Calendar {
     return t;
   }
 
-  protected dateIsBooked(date, inclusivity) {
+  protected dateIsBooked(date: DateTime, inclusivity: string) {
     return this.options.bookedDays
-      .filter((d) => {
+      .filter((d: any) => {
         if (d instanceof Array) {
           return date.isBetween(d[0], d[1], inclusivity);
         }
@@ -571,12 +584,12 @@ export class Calendar {
       }).length;
   }
 
-  private weekdayName(day, representation = 'short') {
+  private weekdayName(day: number, representation = 'short') {
     return new Date(1970, 0, day, 12, 0, 0, 0)
       .toLocaleString(this.options.lang, { weekday: representation });
   }
 
-  private calcSkipDays(date) {
+  private calcSkipDays(date: DateTime) {
     let total = date.getDay() - this.options.firstDay;
     if (total < 0) total += 7;
 

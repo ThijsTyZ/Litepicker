@@ -6,43 +6,45 @@ import { getOrientation, isMobile } from './utils';
 declare module './litepicker' {
   // tslint:disable-next-line: interface-name
   interface Litepicker {
-    show(element?);
-    hide();
+    show(element?: HTMLElement): void;
+    hide(): void;
 
-    getDate();
-    getStartDate();
-    getEndDate();
+    getDate(): Date|null;
+    getStartDate(): Date|null;
+    getEndDate(): Date|null;
 
-    setDate(date);
-    setStartDate(date);
-    setEndDate(date);
-    setDateRange(date1, date2);
+    setDate(date: DateTime): void;
+    setStartDate(date: DateTime): void;
+    setEndDate(date: DateTime): void;
+    setDateRange(date1: DateTime, date2: DateTime): void;
 
-    setLockDays(array);
-    setBookedDays(array);
-    setHighlightedDays(array);
+    setLockDays(array: [any]): void;
+    setBookedDays(array: [any]): void;
+    setHighlightedDays(array: [any]): void;
 
-    gotoDate(date, idx);
+    gotoDate(date: DateTime, idx: number): void;
 
-    setOptions(options);
+    setOptions(options: any): any;
 
-    clearSelection();
+    clearSelection(): void;
 
-    destroy();
+    destroy(): void;
   }
 }
 
-Litepicker.prototype.show = function (el = null) {
-  const element = el ? el : this.options.element;
+Litepicker.prototype.show = function (el: HTMLElement|null = null) {
+  if (!this.picker) return;
+
+  const element = el ? el : this.options?.element;
   this.triggerElement = element;
 
   if (this.options.inlineMode) {
     this.picker.style.position = 'static';
     this.picker.style.display = 'inline-block';
-    this.picker.style.top = null;
-    this.picker.style.left = null;
-    this.picker.style.bottom = null;
-    this.picker.style.right = null;
+    this.picker.style.top = '';
+    this.picker.style.left = '';
+    this.picker.style.bottom = '';
+    this.picker.style.right = '';
     return;
   }
 
@@ -78,12 +80,14 @@ Litepicker.prototype.show = function (el = null) {
     const pickerBCR = this.picker.getBoundingClientRect();
     this.picker.style.top = `calc(50% - ${(pickerBCR.height / 2)}px)`;
     this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
-    this.picker.style.right = null;
-    this.picker.style.bottom = null;
+    this.picker.style.right = '';
+    this.picker.style.bottom = '';
     this.picker.style.zIndex = this.options.zIndex;
 
-    this.backdrop.style.display = 'block';
-    this.backdrop.style.zIndex = this.options.zIndex - 1;
+    if (this.backdrop) {
+      this.backdrop.style.display = 'block';
+      this.backdrop.style.zIndex = `${this.options.zIndex - 1}`;
+    }
     document.body.classList.add(style.litepickerOpen);
 
     if (typeof this.options.onShow === 'function') {
@@ -115,7 +119,7 @@ Litepicker.prototype.show = function (el = null) {
   let leftAlt = 0;
 
   if (this.options.parentEl) {
-    const parentBCR = this.picker.parentNode.getBoundingClientRect();
+    const parentBCR = (this.picker.parentNode as HTMLElement).getBoundingClientRect();
     top -= parentBCR.bottom;
     top += elBCR.height;
 
@@ -147,8 +151,8 @@ Litepicker.prototype.show = function (el = null) {
 
   this.picker.style.top = `${(topAlt ? topAlt : top) + scrollY}px`;
   this.picker.style.left = `${(leftAlt ? leftAlt : left) + scrollX}px`;
-  this.picker.style.right = null;
-  this.picker.style.bottom = null;
+  this.picker.style.right = '';
+  this.picker.style.bottom = '';
 
   if (typeof this.options.onShow === 'function') {
     this.options.onShow.call(this);
@@ -168,23 +172,23 @@ Litepicker.prototype.hide = function () {
     return;
   }
 
-  this.picker.style.display = 'none';
+  if (this.picker) this.picker.style.display = 'none';
 
   if (typeof this.options.onHide === 'function') {
     this.options.onHide.call(this);
   }
 
-  if (this.options.mobileFriendly) {
+  if (this.options.mobileFriendly && this.backdrop) {
     document.body.classList.remove(style.litepickerOpen);
     this.backdrop.style.display = 'none';
   }
 };
 
-Litepicker.prototype.getDate = function (): Date {
+Litepicker.prototype.getDate = function (): Date|null {
   return this.getStartDate();
 };
 
-Litepicker.prototype.getStartDate = function (): Date {
+Litepicker.prototype.getStartDate = function (): Date|null {
   if (this.options.startDate) {
     const castedObj = this.options.startDate.clone() as DateTime;
     return castedObj.getDateInstance();
@@ -193,7 +197,7 @@ Litepicker.prototype.getStartDate = function (): Date {
   return null;
 };
 
-Litepicker.prototype.getEndDate = function (): Date {
+Litepicker.prototype.getEndDate = function (): Date|null {
   if (this.options.endDate) {
     const castedObj = this.options.endDate.clone() as DateTime;
     return castedObj.getDateInstance();
@@ -245,7 +249,7 @@ Litepicker.prototype.setEndDate = function (date) {
 
 Litepicker.prototype.setDateRange = function (date1, date2) {
   // stop repicking by resetting the trigger element
-  this.triggerElement = undefined;
+  this.triggerElement = null;
 
   this.setStartDate(date1);
   this.setEndDate(date2);

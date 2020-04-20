@@ -1,6 +1,6 @@
 export class DateTime {
 
-  public static parseDateTime(date: Date|DateTime|string,
+  public static parseDateTime(date: Date|DateTime|string|null,
                               format: string = 'YYYY-MM-DD',
                               lang: string = 'en-US'): Date {
     if (!date) return new Date(NaN);
@@ -19,8 +19,8 @@ export class DateTime {
           day: 3,
           value: '',
         };
-        let shortMonths = null;
-        let longMonths = null;
+        let shortMonths: ReadonlyArray<string>|null = null;
+        let longMonths: ReadonlyArray<string>|null = null;
 
         if (match.indexOf('MMM') !== -1) {
           shortMonths = this.MONTH_JS.map(x => new Date(2019, x).toLocaleString(lang, { month: 'short' }));
@@ -56,12 +56,12 @@ export class DateTime {
 
             case 'MMM':
               datePattern.month = key + 1;
-              datePattern.value += `(${shortMonths.join('|')})`;
+              datePattern.value += `(${shortMonths?.join('|')})`;
               break;
 
             case 'MMMM':
               datePattern.month = key + 1;
-              datePattern.value += `(${longMonths.join('|')})`;
+              datePattern.value += `(${longMonths?.join('|')})`;
               break;
 
             case 'D':
@@ -80,6 +80,8 @@ export class DateTime {
 
         if (dateRegex.test(date)) {
           const d = dateRegex.exec(date);
+
+          if (!d) return new Date();
 
           const year = Number(d[datePattern.year]);
           let month = Number(d[datePattern.month]) - 1;
@@ -114,13 +116,13 @@ export class DateTime {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
   }
 
-  private static readonly MONTH_JS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  private static readonly MONTH_JS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 
   protected lang: string;
 
   private dateInstance: Date;
 
-  constructor(date: Date|DateTime|string = null, format: string = null, lang: string = 'en-US') {
+  constructor(date: Date|DateTime|string|null = null, format: string|null = null, lang: string = 'en-US') {
     if (format) {
       this.dateInstance = (DateTime.parseDateTime(date, format, lang));
     } else if (date) {
@@ -385,6 +387,7 @@ export class DateTime {
       case 'months':
       // @TODO
     }
+    return NaN;
   }
 
   public format(format: string, lang: string = 'en-US'): string {
@@ -431,11 +434,11 @@ export class DateTime {
             break;
 
           case 'MMM':
-            response += shortMonths[this.getMonth()];
+            response += shortMonths && shortMonths[this.getMonth()];
             break;
 
           case 'MMMM':
-            response += longMonths[this.getMonth()];
+            response += longMonths && longMonths[this.getMonth()];
             break;
 
           case 'D':

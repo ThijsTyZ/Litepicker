@@ -6,6 +6,7 @@
     "declaration": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "strict": true,
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": [

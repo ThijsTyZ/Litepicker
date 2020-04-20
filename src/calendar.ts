@@ -86,22 +86,13 @@ export interface ICalendarOptions {
 
 export class Calendar {
   public options: ICalendarOptions = {
-    // element: null,
-    // elementEnd: null,
-    // parentEl: null,
     firstDay: 1,
     format: 'YYYY-MM-DD',
     lang: 'en-US',
     numberOfMonths: 1,
     numberOfColumns: 1,
-    // startDate: null,
-    // endDate: null,
     zIndex: 9999,
 
-    // minDate: null,
-    // maxDate: null,
-    // minDays: null,
-    // maxDays: null,
     selectForward: false,
     selectBackward: false,
     splitView: false,
@@ -154,18 +145,6 @@ export class Calendar {
       other: 'days',
     },
     tooltipPluralSelector: null,
-
-    // Events
-    // onShow: null,
-    // onHide: null,
-    // onSelect: null,
-    // onError: null,
-    // onRender: null,
-    // onChangeMonth: null,
-    // onChangeYear: null,
-    // onDayHover: null,
-    //
-    // resetBtnCallback: null,
   };
   public calendars: DateTime[] = [];
   public picker: HTMLElement|null = null;

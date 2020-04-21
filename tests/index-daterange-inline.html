@@ -15,20 +15,19 @@
   <script src="../dist/js/main.js"></script>
   <script>
     var picker = new Litepicker({
+        parentEl: document.getElementById("container"),
       onSelect: function(a,b) {
         console.log(a,b);
       },
       inlineMode:false,
-      allowRepick:true,
-      singleMode:true,
+      // allowRepick:true,
+      singleMode: false,
+      inlineMode: true,
       lang: 'es-CO',
       numberOfMonths: 2,
       numberOfColumns: 2,
-      maxDays:28,
       minDays:1,
-      onDayHover: function(a,b) {
-        console.log(a,b);
-      }
+        hotelMode: true,
     });
 
     picker.show();

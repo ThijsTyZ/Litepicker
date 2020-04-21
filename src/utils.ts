@@ -7,7 +7,6 @@ export function getOrientation() {
   if (window.matchMedia('(orientation: portrait)').matches) {
     return 'portrait';
   }
-
   return 'landscape';
 }
 

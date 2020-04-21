@@ -160,7 +160,7 @@ Litepicker.prototype.show = function (el: HTMLElement|null = null) {
 };
 
 Litepicker.prototype.hide = function () {
-  if (!this.isShowning()) {
+  if (!this.isShown()) {
     return;
   }
 
@@ -371,7 +371,7 @@ Litepicker.prototype.clearSelection = function () {
 
   this.updateInput();
 
-  if (this.isShowning()) {
+  if (this.isShown()) {
     this.render();
   }
 };

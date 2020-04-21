@@ -1,4 +1,4 @@
-import {Calendar, CalendarOptions} from './calendar';
+import { Calendar, CalendarOptions } from './calendar';
 import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
@@ -120,6 +120,39 @@ export class Litepicker extends Calendar {
     this.onInit();
   }
 
+  public updateInput() {
+    if (!(this.options.element instanceof HTMLInputElement)) return;
+
+    if (this.options.singleMode && this.options.startDate) {
+      this.options.element.value = this.options.startDate
+        .format(this.options.format, this.options.lang);
+    } else if (!this.options.singleMode && this.options.startDate && this.options.endDate) {
+      const startValue = this.options.startDate
+        .format(this.options.format, this.options.lang);
+      const endValue = this.options.endDate
+        .format(this.options.format, this.options.lang);
+
+      if (this.options.elementEnd) {
+        this.options.element.value = startValue;
+        this.options.elementEnd.value = endValue;
+      } else {
+        this.options.element.value = `${startValue} - ${endValue}`;
+      }
+    }
+
+    if (!this.options.startDate && !this.options.endDate) {
+      this.options.element.value = '';
+
+      if (this.options.elementEnd) {
+        this.options.elementEnd.value = '';
+      }
+    }
+  }
+
+  public isShown() {
+    return this.picker && this.picker.style.display !== 'none';
+  }
+
   private onInit() {
     document.addEventListener('click', e => this.onClick(e), true);
 
@@ -175,7 +208,7 @@ export class Litepicker extends Calendar {
       }
 
       window.addEventListener('orientationchange', () => {
-        if (this.options.mobileFriendly && this.isShowning()) {
+        if (this.options.mobileFriendly && this.isShown()) {
           switch (screen.orientation.angle) {
             case -90:
             case 90:
@@ -236,35 +269,6 @@ export class Litepicker extends Calendar {
     }
 
     return [];
-  }
-
-  public updateInput() {
-    if (!(this.options.element instanceof HTMLInputElement)) return;
-
-    if (this.options.singleMode && this.options.startDate) {
-      this.options.element.value = this.options.startDate
-        .format(this.options.format, this.options.lang);
-    } else if (!this.options.singleMode && this.options.startDate && this.options.endDate) {
-      const startValue = this.options.startDate
-        .format(this.options.format, this.options.lang);
-      const endValue = this.options.endDate
-        .format(this.options.format, this.options.lang);
-
-      if (this.options.elementEnd) {
-        this.options.element.value = startValue;
-        this.options.elementEnd.value = endValue;
-      } else {
-        this.options.element.value = `${startValue} - ${endValue}`;
-      }
-    }
-
-    if (!this.options.startDate && !this.options.endDate) {
-      this.options.element.value = '';
-
-      if (this.options.elementEnd) {
-        this.options.elementEnd.value = '';
-      }
-    }
   }
 
   private isSamePicker(el: Element) {
@@ -723,10 +727,6 @@ export class Litepicker extends Calendar {
       this.updateInput();
       this.render();
     }
-  }
-
-  public isShowning() {
-    return this.picker && this.picker.style.display !== 'none';
   }
 
   private loadPolyfillsForIE11(): void {

@@ -177,6 +177,7 @@ export class Litepicker extends Calendar {
         this.calendars[0] = endDate.clone();
       }
     }
+    const pickerBCR = this.picker.getBoundingClientRect();
 
     if (this.options.mobileFriendly && isMobile()) {
       this.picker.style.position = 'fixed';
@@ -192,7 +193,6 @@ export class Litepicker extends Calendar {
 
       this.render();
 
-      const pickerBCR = this.picker.getBoundingClientRect();
       this.picker.style.top = `calc(50% - ${pickerBCR.height / 2}px)`;
       this.picker.style.left = `calc(50% - ${pickerBCR.width / 2}px)`;
       this.picker.style.right = '';
@@ -225,7 +225,6 @@ export class Litepicker extends Calendar {
 
     if (!element) return;
     const elBCR = element.getBoundingClientRect();
-    const pickerBCR = this.picker.getBoundingClientRect();
 
     let top = elBCR.bottom;
     let left = elBCR.left;
@@ -324,7 +323,7 @@ export class Litepicker extends Calendar {
     return null;
   }
 
-  public setDate(date) {
+  public setDate(date: DateTime) {
     this.setStartDate(date);
 
     if (typeof this.options.onSelect === 'function') {
@@ -332,7 +331,7 @@ export class Litepicker extends Calendar {
     }
   }
 
-  public setStartDate(date) {
+  public setStartDate(date: DateTime) {
     if (!date) return;
 
     this.options.startDate = new DateTime(date, this.options.format, this.options.lang);
@@ -340,7 +339,7 @@ export class Litepicker extends Calendar {
     this.updateInput();
   }
 
-  public setEndDate(date) {
+  public setEndDate(date: DateTime) {
     if (!date) return;
 
     this.options.endDate = new DateTime(date, this.options.format, this.options.lang);
@@ -356,7 +355,7 @@ export class Litepicker extends Calendar {
     this.updateInput();
   }
 
-  public setDateRange(date1, date2) {
+  public setDateRange(date1: DateTime, date2: DateTime) {
     // stop repicking by resetting the trigger element
     this.triggerElement = null;
 
@@ -370,24 +369,24 @@ export class Litepicker extends Calendar {
     }
   }
 
-  public gotoDate(date, idx = 0) {
+  public gotoDate(date: DateTime, idx = 0) {
     const toDate = new DateTime(date);
     toDate.setDate(1);
     this.calendars[idx] = toDate.clone();
     this.render();
   }
 
-  public setLockDays(array) {
+  public setLockDays(array: [any]) {
     this.options.lockDays = DateTime.convertArray(array, this.options.lockDaysFormat || '');
     this.render();
   }
 
-  public setBookedDays(array) {
+  public setBookedDays(array: [any]) {
     this.options.bookedDays = DateTime.convertArray(array, this.options.bookedDaysFormat || '');
     this.render();
   }
 
-  public setHighlightedDays(array) {
+  public setHighlightedDays(array: [any]) {
     this.options.highlightedDays = DateTime.convertArray(
       array,
       this.options.highlightedDaysFormat || '',
@@ -395,7 +394,7 @@ export class Litepicker extends Calendar {
     this.render();
   }
 
-  public setOptions(options) {
+  public setOptions(options:CalendarOptions) {
     delete options.element;
     delete options.elementEnd;
     delete options.parentEl;

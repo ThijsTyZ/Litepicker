@@ -1,3 +1,4 @@
+import { CalendarOptions } from './calendar';
 import { DateTime } from './datetime';
 import { Litepicker } from './litepicker';
 
@@ -21,7 +22,7 @@ declare module './litepicker' {
 
     gotoDate(date: DateTime, idx: number): void;
 
-    setOptions(options: any): any;
+    setOptions(options: CalendarOptions): void;
 
     clearSelection(): void;
 

@@ -1,13 +1,13 @@
 import { Calendar, CalendarOptions } from './calendar';
 import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
-import {findNestedMonthItem, getOrientation, isMobile} from './utils';
+import { findNestedMonthItem, getOrientation, isMobile } from './utils';
 
 export class Litepicker extends Calendar {
-  public triggerElement?: Element|null = null;
-  public backdrop: HTMLDivElement|null = null;
+  public triggerElement?: Element | null = null;
+  public backdrop: HTMLDivElement | null = null;
 
-  private readonly pluralSelector: ((arg: number) => string)|null = null;
+  private readonly pluralSelector: ((arg: number) => string) | null = null;
 
   constructor(options: CalendarOptions) {
     super();
@@ -55,20 +55,12 @@ export class Litepicker extends Calendar {
 
     if (this.options.startDate) {
       if (this.options.singleMode || this.options.endDate) {
-        startValue = new DateTime(
-          this.options.startDate,
-          this.options.format,
-          this.options.lang,
-        );
+        startValue = new DateTime(this.options.startDate, this.options.format, this.options.lang);
       }
     }
 
     if (startValue && this.options.endDate) {
-      endValue = new DateTime(
-        this.options.endDate,
-        this.options.format,
-        this.options.lang,
-      );
+      endValue = new DateTime(this.options.endDate, this.options.format, this.options.lang);
     }
 
     if (startValue instanceof DateTime && !isNaN(startValue.getTime())) {
@@ -82,17 +74,19 @@ export class Litepicker extends Calendar {
     if (this.options.singleMode && !(this.options.startDate instanceof DateTime)) {
       this.options.startDate = undefined;
     }
-    if (!this.options.singleMode
-      && (!(this.options.startDate instanceof DateTime)
-          || !(this.options.endDate instanceof DateTime))) {
+    if (
+      !this.options.singleMode &&
+      (!(this.options.startDate instanceof DateTime) || !(this.options.endDate instanceof DateTime))
+    ) {
       this.options.startDate = undefined;
       this.options.endDate = undefined;
     }
 
     for (let idx = 0; idx < (this.options.numberOfMonths || 1); idx += 1) {
-      const date = this.options.startDate instanceof DateTime
-        ? this.options.startDate.clone()
-        : new DateTime();
+      const date =
+        this.options.startDate instanceof DateTime
+          ? this.options.startDate.clone()
+          : new DateTime();
       date.setDate(1);
       date.setMonth(date.getMonth() + idx);
       this.calendars[idx] = date;
@@ -124,13 +118,13 @@ export class Litepicker extends Calendar {
     if (!(this.options.element instanceof HTMLInputElement)) return;
 
     if (this.options.singleMode && this.options.startDate) {
-      this.options.element.value = this.options.startDate
-        .format(this.options.format, this.options.lang);
+      this.options.element.value = this.options.startDate.format(
+        this.options.format,
+        this.options.lang,
+      );
     } else if (!this.options.singleMode && this.options.startDate && this.options.endDate) {
-      const startValue = this.options.startDate
-        .format(this.options.format, this.options.lang);
-      const endValue = this.options.endDate
-        .format(this.options.format, this.options.lang);
+      const startValue = this.options.startDate.format(this.options.format, this.options.lang);
+      const endValue = this.options.endDate.format(this.options.format, this.options.lang);
 
       if (this.options.elementEnd) {
         this.options.element.value = startValue;
@@ -153,372 +147,350 @@ export class Litepicker extends Calendar {
     return this.picker && this.picker.style.display !== 'none';
   }
 
-  public show (el: HTMLElement|null = null) {
-        if (!this.picker) return;
+  public show(el: HTMLElement | null = null) {
+    if (!this.picker) return;
 
-        const element = el ? el : this.options?.element;
-        this.triggerElement = element;
+    const element = el ? el : this.options?.element;
+    this.triggerElement = element;
 
-        if (this.options.inlineMode) {
-            this.picker.style.position = 'static';
-            this.picker.style.display = 'inline-block';
-            this.picker.style.top = '';
-            this.picker.style.left = '';
-            this.picker.style.bottom = '';
-            this.picker.style.right = '';
-            return;
+    if (this.options.inlineMode) {
+      this.picker.style.position = 'static';
+      this.picker.style.display = 'inline-block';
+      this.picker.style.top = '';
+      this.picker.style.left = '';
+      this.picker.style.bottom = '';
+      this.picker.style.right = '';
+      return;
+    }
+
+    if (this.options.scrollToDate) {
+      if (this.options.startDate && (!el || el === this.options.element)) {
+        const startDate = this.options.startDate.clone();
+        startDate.setDate(1);
+        this.calendars[0] = startDate.clone();
+      } else if (el && this.options.endDate && el === this.options.elementEnd) {
+        const endDate = this.options.endDate.clone();
+        endDate.setDate(1);
+        if (this.options.numberOfMonths > 1) {
+          endDate.setMonth(endDate.getMonth() - (this.options.numberOfMonths - 1));
         }
-
-        if (this.options.scrollToDate) {
-            if (this.options.startDate && (!el || el === this.options.element)) {
-                const startDate = this.options.startDate.clone();
-                startDate.setDate(1);
-                this.calendars[0] = startDate.clone();
-            } else if (el && this.options.endDate && el === this.options.elementEnd) {
-                const endDate = this.options.endDate.clone();
-                endDate.setDate(1);
-                if (this.options.numberOfMonths > 1) {
-                    endDate.setMonth(endDate.getMonth() - (this.options.numberOfMonths - 1));
-                }
-                this.calendars[0] = endDate.clone();
-            }
-        }
-
-        if (this.options.mobileFriendly && isMobile()) {
-            this.picker.style.position = 'fixed';
-            this.picker.style.display = 'block';
-
-            if (getOrientation() === 'portrait') {
-                this.options.numberOfMonths = 1;
-                this.options.numberOfColumns = 1;
-            } else {
-                this.options.numberOfMonths = 2;
-                this.options.numberOfColumns = 2;
-            }
-
-            this.render();
-
-            const pickerBCR = this.picker.getBoundingClientRect();
-            this.picker.style.top = `calc(50% - ${(pickerBCR.height / 2)}px)`;
-            this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
-            this.picker.style.right = '';
-            this.picker.style.bottom = '';
-            this.picker.style.zIndex = `${this.options.zIndex || ''}`;
-
-            if (this.backdrop) {
-                this.backdrop.style.display = 'block';
-                this.backdrop.style.zIndex = `${(this.options.zIndex || 0) - 1}`;
-            }
-            document.body.classList.add(style.litepickerOpen);
-
-            if (typeof this.options.onShow === 'function') {
-                this.options.onShow.call(this);
-            }
-
-            if (el) {
-                el.blur();
-            } else {
-                this.options.element?.blur();
-            }
-            return;
-        }
-
-        this.render();
-
-        this.picker.style.position = 'absolute';
-        this.picker.style.display = 'block';
-        this.picker.style.zIndex = `${this.options.zIndex}`;
-
-        if (!element) return;
-        const elBCR = element.getBoundingClientRect();
-        const pickerBCR = this.picker.getBoundingClientRect();
-
-        let top = elBCR.bottom;
-        let left = elBCR.left;
-        let scrollX = 0;
-        let scrollY = 0;
-        let topAlt = 0;
-        let leftAlt = 0;
-
-        if (this.options.parentEl) {
-            const parentBCR = (this.picker.parentNode as HTMLElement).getBoundingClientRect();
-            top -= parentBCR.bottom;
-            top += elBCR.height;
-
-            if (top + pickerBCR.height > window.innerHeight
-                && (elBCR.top - parentBCR.top) - elBCR.height > 0) {
-                topAlt = (elBCR.top - parentBCR.top) - elBCR.height;
-            }
-
-            left -= parentBCR.left;
-
-            if (left + pickerBCR.width > window.innerWidth
-                && (elBCR.right - parentBCR.right) - pickerBCR.width > 0) {
-                leftAlt = (elBCR.right - parentBCR.right) - pickerBCR.width;
-            }
-        } else {
-            scrollX = window.scrollX || window.pageXOffset;
-            scrollY = window.scrollY || window.pageYOffset;
-
-            if (top + pickerBCR.height > window.innerHeight
-                && elBCR.top - pickerBCR.height > 0) {
-                topAlt = elBCR.top - pickerBCR.height;
-            }
-
-            if (left + pickerBCR.width > window.innerWidth
-                && elBCR.right - pickerBCR.width > 0) {
-                leftAlt = elBCR.right - pickerBCR.width;
-            }
-        }
-
-        this.picker.style.top = `${(topAlt ? topAlt : top) + scrollY}px`;
-        this.picker.style.left = `${(leftAlt ? leftAlt : left) + scrollX}px`;
-        this.picker.style.right = '';
-        this.picker.style.bottom = '';
-
-        if (typeof this.options.onShow === 'function') {
-            this.options.onShow.call(this);
-        }
-    };
-
-    publi hide () {
-        if (!this.isShown()) {
-            return;
-        }
-
-        this.datePicked.length = 0;
-        this.updateInput();
-
-        if (this.options.inlineMode) {
-            this.render();
-            return;
-        }
-
-        if (this.picker) this.picker.style.display = 'none';
-
-        if (typeof this.options.onHide === 'function') {
-            this.options.onHide.call(this);
-        }
-
-        if (this.options.mobileFriendly && this.backdrop) {
-            document.body.classList.remove(style.litepickerOpen);
-            this.backdrop.style.display = 'none';
-        }
-    };
-
-    public getDate(): Date|null {
-        return this.getStartDate();
-    };
-
-    public getStartDate(): Date|null {
-        if (this.options.startDate) {
-            const castedObj = this.options.startDate.clone() as DateTime;
-            return castedObj.getDateInstance();
-        }
-
-        return null;
-    };
-
-    public getEndDate(): Date|null {
-        if (this.options.endDate) {
-            const castedObj = this.options.endDate.clone() as DateTime;
-            return castedObj.getDateInstance();
-        }
-
-        return null;
-    };
-
-    public setDate(date) {
-        this.setStartDate(date);
-
-        if (typeof this.options.onSelect === 'function') {
-            this.options.onSelect.call(this, this.getDate());
-        }
-    };
-
-    public setStartDate(date) {
-        if (!date) return;
-
-        this.options.startDate = new DateTime(
-            date,
-            this.options.format,
-            this.options.lang,
-        );
-
-        this.updateInput();
-    };
-
-    public setEndDate(date) {
-        if (!date) return;
-
-        this.options.endDate = new DateTime(
-            date,
-            this.options.format,
-            this.options.lang,
-        );
-
-        if (this.options.startDate && this.options.startDate.getTime() > this.options.endDate.getTime()) {
-            this.options.endDate = this.options.startDate.clone();
-            this.options.startDate = new DateTime(
-                date,
-                this.options.format,
-                this.options.lang,
-            );
-        }
-
-        this.updateInput();
-    };
-
-    public setDateRange(date1, date2) {
-        // stop repicking by resetting the trigger element
-        this.triggerElement = null;
-
-        this.setStartDate(date1);
-        this.setEndDate(date2);
-
-        this.updateInput();
-
-        if (typeof this.options.onSelect === 'function') {
-            this.options.onSelect.call(this, this.getStartDate(), this.getEndDate());
-        }
-    };
-
-    public gotoDate(date, idx = 0) {
-        const toDate = new DateTime(date);
-        toDate.setDate(1);
-        this.calendars[idx] = toDate.clone();
-        this.render();
-    };
-
-    public setLockDays(array) {
-        this.options.lockDays = DateTime.convertArray(
-            array,
-            this.options.lockDaysFormat || '',
-        );
-        this.render();
-    };
-
-    public setBookedDays(array) {
-        this.options.bookedDays = DateTime.convertArray(
-            array,
-            this.options.bookedDaysFormat || '',
-        );
-        this.render();
-    };
-
-    public setHighlightedDays(array) {
-        this.options.highlightedDays = DateTime.convertArray(
-            array,
-            this.options.highlightedDaysFormat || '',
-        );
-        this.render();
-    };
-
-    public setOptions(options) {
-        delete options.element;
-        delete options.elementEnd;
-        delete options.parentEl;
-
-        if (options.startDate) {
-            options.startDate = new DateTime(
-                options.startDate,
-                this.options.format,
-                this.options.lang,
-            );
-        }
-
-        if (options.endDate) {
-            options.endDate = new DateTime(
-                options.endDate,
-                this.options.format,
-                this.options.lang,
-            );
-        }
-
-        this.options = { ...this.options, ...options };
-
-        if (this.options.singleMode && !(this.options.startDate instanceof Date)) {
-            this.options.startDate = undefined;
-            this.options.endDate = undefined;
-        }
-        if (!this.options.singleMode
-            && (!(this.options.startDate instanceof Date) || !(this.options.endDate instanceof Date))) {
-            this.options.startDate = undefined;
-            this.options.endDate = undefined;
-        }
-
-        for (let idx = 0; idx < this.options.numberOfMonths; idx += 1) {
-            const date = this.options.startDate
-                ? this.options.startDate.clone()
-                : new DateTime();
-            date.setDate(1);
-            date.setMonth(date.getMonth() + idx);
-            this.calendars[idx] = date;
-        }
-
-        if (this.options.lockDays?.length) {
-            this.options.lockDays = DateTime.convertArray(
-                this.options.lockDays,
-                this.options.lockDaysFormat || '',
-            );
-        }
-
-        if (this.options.bookedDays?.length) {
-            this.options.bookedDays = DateTime.convertArray(
-                this.options.bookedDays,
-                this.options.bookedDaysFormat || '',
-            );
-        }
-
-        if (this.options.highlightedDays?.length) {
-            this.options.highlightedDays = DateTime.convertArray(
-                this.options.highlightedDays,
-                this.options.highlightedDaysFormat || '',
-            );
-        }
-
-        this.render();
-
-        if (this.options.inlineMode) {
-            this.show();
-        }
-
-        this.updateInput();
-    };
-
-    public clearSelection() {
-        this.options.startDate = undefined;
-        this.options.endDate = undefined;
-        this.datePicked.length = 0;
-
-        this.updateInput();
-
-        if (this.isShown()) {
-            this.render();
-        }
-    };
-
-    public destroy() {
-        if (this.picker && this.picker.parentNode) {
-            this.picker.parentNode.removeChild(this.picker);
-            this.picker = null;
-        }
-
-        if (this.backdrop && this.backdrop.parentNode) {
-            this.backdrop.parentNode.removeChild(this.backdrop);
-        }
-    };
-
-
-    private onInit() {
-    document.addEventListener('click', e => this.onClick(e), true);
+        this.calendars[0] = endDate.clone();
+      }
+    }
+
+    if (this.options.mobileFriendly && isMobile()) {
+      this.picker.style.position = 'fixed';
+      this.picker.style.display = 'block';
+
+      if (getOrientation() === 'portrait') {
+        this.options.numberOfMonths = 1;
+        this.options.numberOfColumns = 1;
+      } else {
+        this.options.numberOfMonths = 2;
+        this.options.numberOfColumns = 2;
+      }
+
+      this.render();
+
+      const pickerBCR = this.picker.getBoundingClientRect();
+      this.picker.style.top = `calc(50% - ${pickerBCR.height / 2}px)`;
+      this.picker.style.left = `calc(50% - ${pickerBCR.width / 2}px)`;
+      this.picker.style.right = '';
+      this.picker.style.bottom = '';
+      this.picker.style.zIndex = `${this.options.zIndex || ''}`;
+
+      if (this.backdrop) {
+        this.backdrop.style.display = 'block';
+        this.backdrop.style.zIndex = `${(this.options.zIndex || 0) - 1}`;
+      }
+      document.body.classList.add(style.litepickerOpen);
+
+      if (typeof this.options.onShow === 'function') {
+        this.options.onShow.call(this);
+      }
+
+      if (el) {
+        el.blur();
+      } else {
+        this.options.element?.blur();
+      }
+      return;
+    }
+
+    this.render();
+
+    this.picker.style.position = 'absolute';
+    this.picker.style.display = 'block';
+    this.picker.style.zIndex = `${this.options.zIndex}`;
+
+    if (!element) return;
+    const elBCR = element.getBoundingClientRect();
+    const pickerBCR = this.picker.getBoundingClientRect();
+
+    let top = elBCR.bottom;
+    let left = elBCR.left;
+    let scrollX = 0;
+    let scrollY = 0;
+    let topAlt = 0;
+    let leftAlt = 0;
+
+    if (this.options.parentEl) {
+      const parentBCR = (this.picker.parentNode as HTMLElement).getBoundingClientRect();
+      top -= parentBCR.bottom;
+      top += elBCR.height;
+
+      if (
+        top + pickerBCR.height > window.innerHeight &&
+        elBCR.top - parentBCR.top - elBCR.height > 0
+      ) {
+        topAlt = elBCR.top - parentBCR.top - elBCR.height;
+      }
+
+      left -= parentBCR.left;
+
+      if (
+        left + pickerBCR.width > window.innerWidth &&
+        elBCR.right - parentBCR.right - pickerBCR.width > 0
+      ) {
+        leftAlt = elBCR.right - parentBCR.right - pickerBCR.width;
+      }
+    } else {
+      scrollX = window.scrollX || window.pageXOffset;
+      scrollY = window.scrollY || window.pageYOffset;
+
+      if (top + pickerBCR.height > window.innerHeight && elBCR.top - pickerBCR.height > 0) {
+        topAlt = elBCR.top - pickerBCR.height;
+      }
+
+      if (left + pickerBCR.width > window.innerWidth && elBCR.right - pickerBCR.width > 0) {
+        leftAlt = elBCR.right - pickerBCR.width;
+      }
+    }
+
+    this.picker.style.top = `${(topAlt ? topAlt : top) + scrollY}px`;
+    this.picker.style.left = `${(leftAlt ? leftAlt : left) + scrollX}px`;
+    this.picker.style.right = '';
+    this.picker.style.bottom = '';
+
+    if (typeof this.options.onShow === 'function') {
+      this.options.onShow.call(this);
+    }
+  }
+
+  public hide() {
+    if (!this.isShown()) {
+      return;
+    }
+
+    this.datePicked.length = 0;
+    this.updateInput();
+
+    if (this.options.inlineMode) {
+      this.render();
+      return;
+    }
+
+    if (this.picker) this.picker.style.display = 'none';
+
+    if (typeof this.options.onHide === 'function') {
+      this.options.onHide.call(this);
+    }
+
+    if (this.options.mobileFriendly && this.backdrop) {
+      document.body.classList.remove(style.litepickerOpen);
+      this.backdrop.style.display = 'none';
+    }
+  }
+
+  public getDate(): Date | null {
+    return this.getStartDate();
+  }
+
+  public getStartDate(): Date | null {
+    if (this.options.startDate) {
+      const castedObj = this.options.startDate.clone() as DateTime;
+      return castedObj.getDateInstance();
+    }
+
+    return null;
+  }
+
+  public getEndDate(): Date | null {
+    if (this.options.endDate) {
+      const castedObj = this.options.endDate.clone() as DateTime;
+      return castedObj.getDateInstance();
+    }
+
+    return null;
+  }
+
+  public setDate(date) {
+    this.setStartDate(date);
+
+    if (typeof this.options.onSelect === 'function') {
+      this.options.onSelect.call(this, this.getDate());
+    }
+  }
+
+  public setStartDate(date) {
+    if (!date) return;
+
+    this.options.startDate = new DateTime(date, this.options.format, this.options.lang);
+
+    this.updateInput();
+  }
+
+  public setEndDate(date) {
+    if (!date) return;
+
+    this.options.endDate = new DateTime(date, this.options.format, this.options.lang);
+
+    if (
+      this.options.startDate &&
+      this.options.startDate.getTime() > this.options.endDate.getTime()
+    ) {
+      this.options.endDate = this.options.startDate.clone();
+      this.options.startDate = new DateTime(date, this.options.format, this.options.lang);
+    }
+
+    this.updateInput();
+  }
+
+  public setDateRange(date1, date2) {
+    // stop repicking by resetting the trigger element
+    this.triggerElement = null;
+
+    this.setStartDate(date1);
+    this.setEndDate(date2);
+
+    this.updateInput();
+
+    if (typeof this.options.onSelect === 'function') {
+      this.options.onSelect.call(this, this.getStartDate(), this.getEndDate());
+    }
+  }
+
+  public gotoDate(date, idx = 0) {
+    const toDate = new DateTime(date);
+    toDate.setDate(1);
+    this.calendars[idx] = toDate.clone();
+    this.render();
+  }
+
+  public setLockDays(array) {
+    this.options.lockDays = DateTime.convertArray(array, this.options.lockDaysFormat || '');
+    this.render();
+  }
+
+  public setBookedDays(array) {
+    this.options.bookedDays = DateTime.convertArray(array, this.options.bookedDaysFormat || '');
+    this.render();
+  }
+
+  public setHighlightedDays(array) {
+    this.options.highlightedDays = DateTime.convertArray(
+      array,
+      this.options.highlightedDaysFormat || '',
+    );
+    this.render();
+  }
+
+  public setOptions(options) {
+    delete options.element;
+    delete options.elementEnd;
+    delete options.parentEl;
+
+    if (options.startDate) {
+      options.startDate = new DateTime(options.startDate, this.options.format, this.options.lang);
+    }
+
+    if (options.endDate) {
+      options.endDate = new DateTime(options.endDate, this.options.format, this.options.lang);
+    }
+
+    this.options = { ...this.options, ...options };
+
+    if (this.options.singleMode && !(this.options.startDate instanceof Date)) {
+      this.options.startDate = undefined;
+      this.options.endDate = undefined;
+    }
+    if (
+      !this.options.singleMode &&
+      (!(this.options.startDate instanceof Date) || !(this.options.endDate instanceof Date))
+    ) {
+      this.options.startDate = undefined;
+      this.options.endDate = undefined;
+    }
+
+    for (let idx = 0; idx < this.options.numberOfMonths; idx += 1) {
+      const date = this.options.startDate ? this.options.startDate.clone() : new DateTime();
+      date.setDate(1);
+      date.setMonth(date.getMonth() + idx);
+      this.calendars[idx] = date;
+    }
+
+    if (this.options.lockDays?.length) {
+      this.options.lockDays = DateTime.convertArray(
+        this.options.lockDays,
+        this.options.lockDaysFormat || '',
+      );
+    }
+
+    if (this.options.bookedDays?.length) {
+      this.options.bookedDays = DateTime.convertArray(
+        this.options.bookedDays,
+        this.options.bookedDaysFormat || '',
+      );
+    }
+
+    if (this.options.highlightedDays?.length) {
+      this.options.highlightedDays = DateTime.convertArray(
+        this.options.highlightedDays,
+        this.options.highlightedDaysFormat || '',
+      );
+    }
+
+    this.render();
+
+    if (this.options.inlineMode) {
+      this.show();
+    }
+
+    this.updateInput();
+  }
+
+  public clearSelection() {
+    this.options.startDate = undefined;
+    this.options.endDate = undefined;
+    this.datePicked.length = 0;
+
+    this.updateInput();
+
+    if (this.isShown()) {
+      this.render();
+    }
+  }
+
+  public destroy() {
+    if (this.picker && this.picker.parentNode) {
+      this.picker.parentNode.removeChild(this.picker);
+      this.picker = null;
+    }
+
+    if (this.backdrop && this.backdrop.parentNode) {
+      this.backdrop.parentNode.removeChild(this.backdrop);
+    }
+  }
+
+  private onInit() {
+    document.addEventListener('click', (e) => this.onClick(e), true);
 
     this.picker = document.createElement('div');
     this.picker.className = style.litepicker;
     this.picker.style.display = 'none';
-    this.picker.addEventListener('keydown', e => this.onKeyDown(e), true);
-    this.picker.addEventListener('mouseenter', e => this.onMouseEnter(e), true);
-    this.picker.addEventListener('mouseleave', e => this.onMouseLeave(e), false);
+    this.picker.addEventListener('keydown', (e) => this.onKeyDown(e), true);
+    this.picker.addEventListener('mouseenter', (e) => this.onMouseEnter(e), true);
+    this.picker.addEventListener('mouseleave', (e) => this.onMouseLeave(e), false);
     if (this.options.element instanceof HTMLElement) {
       this.options.element.addEventListener('change', (e: Event) => this.onInput(e), true);
     }
@@ -544,7 +516,7 @@ export class Litepicker extends Calendar {
             this.options.element.parentNode.appendChild(this.picker);
           }
         } else {
-            // @ts-ignore
+          // @ts-ignore
           if (this.options.element) this.options.element.appendChild(this.picker);
         }
       } else {
@@ -583,8 +555,8 @@ export class Litepicker extends Calendar {
 
           if (this.picker) {
             const pickerBCR = this.picker.getBoundingClientRect();
-            this.picker.style.top = `calc(50% - ${(pickerBCR.height / 2)}px)`;
-            this.picker.style.left = `calc(50% - ${(pickerBCR.width / 2)}px)`;
+            this.picker.style.top = `calc(50% - ${pickerBCR.height / 2}px)`;
+            this.picker.style.left = `calc(50% - ${pickerBCR.width / 2}px)`;
           }
         }
       });
@@ -599,29 +571,25 @@ export class Litepicker extends Calendar {
 
   private parseInput() {
     if (this.options.elementEnd) {
-      if (this.options.element instanceof HTMLInputElement
-        && this.options.element.value.length
-        && this.options.elementEnd instanceof HTMLInputElement
-        && this.options.elementEnd.value.length) {
+      if (
+        this.options.element instanceof HTMLInputElement &&
+        this.options.element.value.length &&
+        this.options.elementEnd instanceof HTMLInputElement &&
+        this.options.elementEnd.value.length
+      ) {
         return [
           new DateTime(this.options.element.value),
           new DateTime(this.options.elementEnd.value),
         ];
       }
     } else if (this.options.singleMode) {
-      if (this.options.element instanceof HTMLInputElement
-        && this.options.element.value.length) {
-        return [
-          new DateTime(this.options.element.value),
-        ];
+      if (this.options.element instanceof HTMLInputElement && this.options.element.value.length) {
+        return [new DateTime(this.options.element.value)];
       }
     } else if (/\s\-\s/.test((this.options.element as HTMLInputElement)?.value || '')) {
       const values = (this.options.element as HTMLInputElement)?.value.split(' - ');
       if (values?.length === 2) {
-        return [
-          new DateTime(values[0]),
-          new DateTime(values[1]),
-        ];
+        return [new DateTime(values[0]), new DateTime(values[1])];
       }
     }
 
@@ -635,8 +603,9 @@ export class Litepicker extends Calendar {
   }
 
   private shouldShown(el: Element) {
-    return el === this.options.element
-      || (this.options.elementEnd && el === this.options.elementEnd);
+    return (
+      el === this.options.element || (this.options.elementEnd && el === this.options.elementEnd)
+    );
   }
 
   private shouldResetDatePicked() {
@@ -644,20 +613,25 @@ export class Litepicker extends Calendar {
   }
 
   private shouldSwapDatePicked() {
-    return this.datePicked.length === 2
-      && this.datePicked[0].getTime() > this.datePicked[1].getTime();
+    return (
+      this.datePicked.length === 2 && this.datePicked[0].getTime() > this.datePicked[1].getTime()
+    );
   }
 
   private shouldCheckLockDays() {
-    return this.options.disallowLockDaysInRange
-      && this.options.lockDays?.length
-      && this.datePicked.length === 2;
+    return (
+      this.options.disallowLockDaysInRange &&
+      this.options.lockDays?.length &&
+      this.datePicked.length === 2
+    );
   }
 
   private shouldCheckBookedDays() {
-    return this.options.disallowBookedDaysInRange
-      && this.options.bookedDays?.length
-      && this.datePicked.length === 2;
+    return (
+      this.options.disallowBookedDaysInRange &&
+      this.options.bookedDays?.length &&
+      this.datePicked.length === 2
+    );
   }
 
   private onClick(e: MouseEvent) {
@@ -710,13 +684,15 @@ export class Litepicker extends Calendar {
       if (this.shouldCheckLockDays()) {
         const inclusivity = this.options.lockDaysInclusivity;
         const locked = this.options.lockDays?.filter((d: any) => {
-            if (d instanceof Array) {
-              return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
-                || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
-            }
+          if (d instanceof Array) {
+            return (
+              d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity) ||
+              d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
+            );
+          }
 
-            return d.isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
-          }).length;
+          return d.isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
+        }).length;
 
         if (locked) {
           this.datePicked.length = 0;
@@ -735,16 +711,18 @@ export class Litepicker extends Calendar {
         }
 
         const booked = this.options.bookedDays?.filter((d: any) => {
-            if (d instanceof Array) {
-              return d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
-                || d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity);
-            }
+          if (d instanceof Array) {
+            return (
+              d[0].isBetween(this.datePicked[0], this.datePicked[1], inclusivity) ||
+              d[1].isBetween(this.datePicked[0], this.datePicked[1], inclusivity)
+            );
+          }
 
-            return d.isBetween(this.datePicked[0], this.datePicked[1]);
-          }).length;
+          return d.isBetween(this.datePicked[0], this.datePicked[1]);
+        }).length;
 
-        const anyBookedDaysAsCheckout = this.options.anyBookedDaysAsCheckout
-          && this.datePicked.length === 1;
+        const anyBookedDaysAsCheckout =
+          this.options.anyBookedDaysAsCheckout && this.datePicked.length === 1;
 
         if (booked && !anyBookedDaysAsCheckout) {
           this.datePicked.length = 0;
@@ -893,16 +871,20 @@ export class Litepicker extends Calendar {
   }
 
   private shouldAllowMouseEnter(el: HTMLElement) {
-    return !this.options.singleMode
-      && !el.classList.contains(style.isLocked)
-      && !el.classList.contains(style.isBooked);
+    return (
+      !this.options.singleMode &&
+      !el.classList.contains(style.isLocked) &&
+      !el.classList.contains(style.isBooked)
+    );
   }
 
   private shouldAllowRepick() {
-    return this.options.elementEnd
-      && this.options.allowRepick
-      && this.options.startDate
-      && this.options.endDate;
+    return (
+      this.options.elementEnd &&
+      this.options.allowRepick &&
+      this.options.startDate &&
+      this.options.endDate
+    );
   }
 
   private isDayItem(el: HTMLElement) {
@@ -917,8 +899,11 @@ export class Litepicker extends Calendar {
     }
 
     if (typeof this.options.onDayHover === 'function') {
-      this.options.onDayHover.call(this, DateTime.parseDateTime(target.dataset.time || null),
-                                   target.classList.value?.split(/\s/));
+      this.options.onDayHover.call(
+        this,
+        DateTime.parseDateTime(target.dataset.time || null),
+        target.classList.value?.split(/\s/),
+      );
     }
 
     if (this.shouldAllowMouseEnter(target)) {
@@ -934,8 +919,9 @@ export class Litepicker extends Calendar {
         return;
       }
 
-      const startDateElement = this.picker
-        .querySelector(`.${style.dayItem}[data-time="${this.datePicked[0].getTime()}"]`);
+      const startDateElement = this.picker.querySelector(
+        `.${style.dayItem}[data-time="${this.datePicked[0].getTime()}"]`,
+      );
       let date1 = this.datePicked[0].clone();
       let date2 = new DateTime(target.dataset.time);
       let isFlipped = false;
@@ -1017,7 +1003,7 @@ export class Litepicker extends Calendar {
         if (target.classList.contains(style.dayItem)) {
           event.preventDefault();
 
-          const idx = [...target.parentNode.childNodes].findIndex(el => el === target) - 7;
+          const idx = [...target.parentNode.childNodes].findIndex((el) => el === target) - 7;
 
           if (idx > 0 && target.parentNode.childNodes[idx]) {
             target.parentNode.childNodes[idx].focus();
@@ -1045,7 +1031,7 @@ export class Litepicker extends Calendar {
         if (target.classList.contains(style.dayItem)) {
           event.preventDefault();
 
-          const idx = [...target.parentNode.childNodes].findIndex(el => el === target) + 7;
+          const idx = [...target.parentNode.childNodes].findIndex((el) => el === target) + 7;
 
           if (idx > 0 && target.parentNode.childNodes[idx]) {
             target.parentNode.childNodes[idx].focus();
@@ -1058,27 +1044,22 @@ export class Litepicker extends Calendar {
   private onInput(event: Event) {
     let [startValue, endValue] = this.parseInput();
 
-    if (startValue instanceof Date && !isNaN(startValue.getTime())
-      && endValue instanceof Date && !isNaN(endValue.getTime())) {
-
+    if (
+      startValue instanceof Date &&
+      !isNaN(startValue.getTime()) &&
+      endValue instanceof Date &&
+      !isNaN(endValue.getTime())
+    ) {
       if (startValue.getTime() > endValue.getTime()) {
         const tempDate = startValue.clone();
         startValue = endValue.clone();
         endValue = tempDate.clone();
       }
 
-      this.options.startDate = new DateTime(
-        startValue,
-        this.options.format,
-        this.options.lang,
-      );
+      this.options.startDate = new DateTime(startValue, this.options.format, this.options.lang);
 
       if (this.options.startDate) {
-        this.options.endDate = new DateTime(
-          endValue,
-          this.options.format,
-          this.options.lang,
-        );
+        this.options.endDate = new DateTime(endValue, this.options.format, this.options.lang);
       }
 
       this.updateInput();
@@ -1087,14 +1068,14 @@ export class Litepicker extends Calendar {
   }
 
   private loadPolyfillsForIE11(): void {
-  // Support for Object.entries(...)
-  // copied from
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+    // Support for Object.entries(...)
+    // copied from
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
     if (!Object.entries) {
       Object.entries = (obj: any) => {
         const ownProps = Object.keys(obj);
         let i = ownProps.length;
-        const  resArray = new Array(i); // preallocate the Array
+        const resArray = new Array(i); // preallocate the Array
         while (i) {
           i = i - 1;
           resArray[i] = [ownProps[i], obj[ownProps[i]]];
@@ -1107,13 +1088,13 @@ export class Litepicker extends Calendar {
     // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill
     if (!Element.prototype.matches) {
       // tslint:disable-next-line: no-string-literal
-      Element.prototype.matches = (Element.prototype as any)['msMatchesSelector'] ||
-                                    Element.prototype.webkitMatchesSelector;
+      Element.prototype.matches =
+        (Element.prototype as any)['msMatchesSelector'] || Element.prototype.webkitMatchesSelector;
     }
     if (!Element.prototype.closest) {
       Element.prototype.closest = function (s: any) {
         // tslint:disable-next-line: no-this-assignment
-        let el: Element|Node & ParentNode|null = this;
+        let el: Element | (Node & ParentNode) | null = this;
 
         do {
           if ((el as Element).matches(s)) return el;

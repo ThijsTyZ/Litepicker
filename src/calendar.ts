@@ -10,7 +10,7 @@ export interface CalendarOptions {
   firstDay: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   format: string;
   lang?: string;
-  numberOfMonths: number;
+  numberOfMonths?: number;
   numberOfColumns?: number;
   startDate?: DateTime;
   endDate?: DateTime;
@@ -448,7 +448,7 @@ export class Calendar {
         }
       }
     } else if (this.options.startDate) {
-      if (this.options.startDate.toDateString() === date.toDateString()) {
+      if ((this.options.startDate as DateTime).toDateString() === date.toDateString()) {
         day.classList.add(style.isStartDate);
 
         if (this.options.singleMode) {
@@ -456,12 +456,12 @@ export class Calendar {
         }
       }
 
-      if (this.options.endDate && this.options.endDate.toDateString() === date.toDateString()) {
+      if (this.options.endDate && (this.options.endDate as DateTime).toDateString() === date.toDateString()) {
         day.classList.add(style.isEndDate);
       }
 
       if (this.options.startDate && this.options.endDate) {
-        if (date.isBetween(this.options.startDate, this.options.endDate)) {
+        if (date.isBetween(this.options.startDate as DateTime, this.options.endDate as DateTime)) {
           day.classList.add(style.isInRange);
         }
       }

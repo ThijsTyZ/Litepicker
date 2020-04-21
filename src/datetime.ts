@@ -390,7 +390,7 @@ export class DateTime {
     return NaN;
   }
 
-  public format(format: string, lang: string = 'en-US'): string {
+  public format(format: string = 'YYYY-MM-DD', lang: string = 'en-US'): string {
     let response = '';
     const match = format.match(/\[([^\]]+)]|Y{2,4}|M{1,4}|D{1,2}|d{1,4}/g);
 

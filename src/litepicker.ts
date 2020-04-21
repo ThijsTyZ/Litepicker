@@ -173,8 +173,8 @@ export class Litepicker extends Calendar {
       } else if (el && this.options.endDate && el === this.options.elementEnd) {
         const endDate = this.options.endDate.clone();
         endDate.setDate(1);
-        if (this.options.numberOfMonths > 1) {
-          endDate.setMonth(endDate.getMonth() - (this.options.numberOfMonths - 1));
+        if (this.options.numberOfMonths ?? 1 > 1) {
+          endDate.setMonth(endDate.getMonth() - (this.options.numberOfMonths ?? 1 - 1));
         }
         this.calendars[0] = endDate.clone();
       }
@@ -423,8 +423,8 @@ export class Litepicker extends Calendar {
       this.options.endDate = undefined;
     }
 
-    for (let idx = 0; idx < this.options.numberOfMonths; idx += 1) {
-      const date = this.options.startDate ? this.options.startDate.clone() : new DateTime();
+    for (let idx = 0; idx < (this.options.numberOfMonths || 1); idx += 1) {
+      const date = this.options.startDate ? (this.options.startDate as DateTime).clone() : new DateTime();
       date.setDate(1);
       date.setMonth(date.getMonth() + idx);
       this.calendars[idx] = date;
@@ -757,7 +757,7 @@ export class Litepicker extends Calendar {
       }
 
       let idx = 0;
-      let numberOfMonths = this.options.numberOfMonths;
+      let numberOfMonths = this.options.numberOfMonths ?? 1;
 
       if (this.options.splitView) {
         const monthItem = target.closest(`.${style.monthItem}`);
@@ -767,7 +767,7 @@ export class Litepicker extends Calendar {
         }
       }
 
-      this.calendars[idx].setMonth(this.calendars[idx].getMonth() - numberOfMonths);
+      this.calendars[idx].setMonth(this.calendars[idx].getMonth() - (numberOfMonths || 1));
       this.gotoDate(this.calendars[idx], idx);
 
       if (typeof this.options.onChangeMonth === 'function') {
@@ -785,7 +785,7 @@ export class Litepicker extends Calendar {
       }
 
       let idx = 0;
-      let numberOfMonths = this.options.numberOfMonths;
+      let numberOfMonths = this.options.numberOfMonths ?? 1;
 
       if (this.options.splitView) {
         const monthItem = target.closest(`.${style.monthItem}`);

@@ -3,8 +3,6 @@ import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem, getOrientation, isMobile } from './utils';
 
-export { Calendar }
-
 export class Litepicker extends Calendar {
   private triggerElement?: Element | null = null;
   private backdrop: HTMLDivElement | null = null;

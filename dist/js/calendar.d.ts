@@ -1,0 +1,86 @@
+import { DateTime } from './datetime';
+export interface CalendarOptions {
+    element?: HTMLInputElement | null;
+    elementEnd?: HTMLInputElement | null;
+    parentEl?: HTMLElement | string | null;
+    firstDay: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    format: string;
+    lang?: string;
+    numberOfMonths?: number;
+    numberOfColumns?: number;
+    startDate?: DateTime;
+    endDate?: DateTime;
+    zIndex?: number;
+    minDate?: Date;
+    maxDate?: Date;
+    minDays?: number;
+    maxDays?: number;
+    selectForward?: boolean;
+    selectBackward?: boolean;
+    splitView?: boolean;
+    inlineMode?: boolean;
+    singleMode?: boolean;
+    autoApply?: boolean;
+    allowRepick?: boolean;
+    showWeekNumbers?: boolean;
+    showTooltip?: boolean;
+    hotelMode?: boolean;
+    disableWeekends?: boolean;
+    scrollToDate?: boolean;
+    mobileFriendly?: boolean;
+    useResetBtn?: boolean;
+    footerHTML?: string;
+    lockDaysFormat?: string;
+    lockDays?: any[];
+    disallowLockDaysInRange?: boolean;
+    lockDaysInclusivity?: string;
+    bookedDaysFormat?: string;
+    bookedDays?: any[];
+    disallowBookedDaysInRange?: boolean;
+    bookedDaysInclusivity?: string;
+    anyBookedDaysAsCheckout?: boolean;
+    highlightedDaysFormat?: string;
+    highlightedDays?: any[];
+    dropdowns?: {
+        minYear: number;
+        maxYear: null;
+        months: boolean;
+        years: boolean;
+    };
+    buttonText?: {
+        apply: string;
+        cancel: string;
+        previousMonth: string;
+        nextMonth: string;
+        reset: string;
+    };
+    tooltipText?: {
+        one: string;
+        other: string;
+    };
+    tooltipPluralSelector?: null;
+    onShow?: () => void;
+    onHide?: () => void;
+    onSelect?: (date: Date | null, endDate?: Date | null) => void;
+    onError?: (error: string) => void;
+    onRender?: () => void;
+    onChangeMonth?: (calendar: DateTime, month: number) => void;
+    onChangeYear?: (calendar: DateTime, year: number) => void;
+    onDayHover?: (calendar: Date, day: string[]) => void;
+    resetBtnCallback?: (event: MouseEvent) => void;
+}
+export declare class Calendar {
+    protected options: CalendarOptions;
+    protected calendars: DateTime[];
+    protected picker: HTMLElement | null;
+    protected datePicked: DateTime[];
+    render(): void;
+    protected renderMonth(date: DateTime): HTMLDivElement;
+    protected renderDay(date: DateTime): HTMLAnchorElement;
+    protected renderFooter(): HTMLDivElement;
+    protected renderWeekNumber(date: DateTime): HTMLDivElement;
+    protected renderTooltip(): HTMLDivElement;
+    protected dateIsBooked(date: DateTime, inclusivity?: string): number | undefined;
+    private weekdayName;
+    private calcSkipDays;
+}

@@ -1,0 +1,35 @@
+export declare class DateTime {
+    static parseDateTime(date: Date | DateTime | string | null, format?: string, lang?: string): Date;
+    static convertArray(array: Array<Date | Date[] | string | string[]>, format: string): Array<DateTime | DateTime[]>;
+    static getDateZeroTime(date: Date): Date;
+    private static readonly MONTH_JS;
+    protected lang: string;
+    private dateInstance;
+    constructor(date?: Date | DateTime | string | null, format?: string | null, lang?: string);
+    getDateInstance(): Date;
+    toLocaleString(arg0: string, arg1: Intl.DateTimeFormatOptions): string;
+    toDateString(): string;
+    getSeconds(): number;
+    getDay(): number;
+    getTime(): number;
+    getDate(): number;
+    getMonth(): number;
+    getFullYear(): number;
+    setMonth(arg: number): number;
+    setSeconds(arg: number): number;
+    setDate(arg: number): number;
+    setFullYear(arg: number): number;
+    getWeek(firstDay: number): number;
+    clone(): DateTime;
+    isBetween(date1: DateTime, date2: DateTime, inclusivity?: string): boolean;
+    isBefore(date: DateTime, unit?: string): boolean;
+    isSameOrBefore(date: DateTime, unit?: string): boolean;
+    isAfter(date: DateTime, unit?: string): boolean;
+    isSameOrAfter(date: DateTime, unit?: string): boolean;
+    isSame(date: DateTime, unit?: string): boolean;
+    add(duration: number, unit?: string): DateTime;
+    subtract(duration: number, unit?: string): DateTime;
+    diff(date: DateTime, unit?: string): number;
+    format(format?: string, lang?: string): string;
+    private timestamp;
+}

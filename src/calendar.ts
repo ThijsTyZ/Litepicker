@@ -3,12 +3,12 @@ import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
 export interface CalendarOptions {
-  element?: HTMLInputElement | null;
+  element?: HTMLInputElement | HTMLElement | null;
   elementEnd?: HTMLInputElement | null;
   parentEl?: HTMLElement | string | null;
 
-  firstDay: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  format: string;
+  firstDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  format?: string;
   lang?: string;
   numberOfMonths?: number;
   numberOfColumns?: number;

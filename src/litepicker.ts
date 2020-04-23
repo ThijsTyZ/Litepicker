@@ -3,7 +3,10 @@ import { DateTime } from './datetime';
 import * as style from './scss/main.scss';
 import { findNestedMonthItem, getOrientation, isMobile } from './utils';
 
-export { Calendar }
+export interface LitepickerOptions extends Omit<CalendarOptions, 'startDate' | 'endDate'> {
+  startDate?: Date | string | number;
+  endDate?: Date | string | number;
+}
 
 export class Litepicker extends Calendar {
   private triggerElement?: Element | null = null;
@@ -11,10 +14,12 @@ export class Litepicker extends Calendar {
 
   private readonly pluralSelector: ((arg: number) => string) | null = null;
 
-  constructor(options: CalendarOptions) {
+  constructor(options: LitepickerOptions) {
     super();
 
-    this.options = { ...this.options, ...options };
+    const { startDate, endDate } = options;
+
+    this.options = { ...this.options, ...options, startDate: undefined, endDate: undefined };
 
     if (!this.options.elementEnd) {
       this.options.allowRepick = false;
@@ -55,14 +60,14 @@ export class Litepicker extends Calendar {
 
     let [startValue, endValue] = this.parseInput();
 
-    if (this.options.startDate) {
-      if (this.options.singleMode || this.options.endDate) {
-        startValue = new DateTime(this.options.startDate, this.options.format, this.options.lang);
+    if (startDate) {
+      if (this.options.singleMode || endDate) {
+        startValue = new DateTime(startDate, this.options.format, this.options.lang);
       }
     }
 
-    if (startValue && this.options.endDate) {
-      endValue = new DateTime(this.options.endDate, this.options.format, this.options.lang);
+    if (startValue && endDate) {
+      endValue = new DateTime(endDate, this.options.format, this.options.lang);
     }
 
     if (startValue instanceof DateTime && !isNaN(startValue.getTime())) {
@@ -325,7 +330,7 @@ export class Litepicker extends Calendar {
     return null;
   }
 
-  public setDate(date: DateTime) {
+  public setDate(date: DateTime | Date | string | number) {
     this.setStartDate(date);
 
     if (typeof this.options.onSelect === 'function') {
@@ -333,7 +338,7 @@ export class Litepicker extends Calendar {
     }
   }
 
-  public setStartDate(date: DateTime) {
+  public setStartDate(date: DateTime | Date | string | number) {
     if (!date) return;
 
     this.options.startDate = new DateTime(date, this.options.format, this.options.lang);
@@ -341,7 +346,7 @@ export class Litepicker extends Calendar {
     this.updateInput();
   }
 
-  public setEndDate(date: DateTime) {
+  public setEndDate(date: DateTime | Date | string | number) {
     if (!date) return;
 
     this.options.endDate = new DateTime(date, this.options.format, this.options.lang);
@@ -357,7 +362,10 @@ export class Litepicker extends Calendar {
     this.updateInput();
   }
 
-  public setDateRange(date1: DateTime, date2: DateTime) {
+  public setDateRange(
+    date1: DateTime | Date | string | number,
+    date2: DateTime | Date | string | number,
+  ) {
     // stop repicking by resetting the trigger element
     this.triggerElement = null;
 
@@ -396,7 +404,7 @@ export class Litepicker extends Calendar {
     this.render();
   }
 
-  public setOptions(options:CalendarOptions) {
+  public setOptions(options: CalendarOptions) {
     delete options.element;
     delete options.elementEnd;
     delete options.parentEl;
@@ -424,7 +432,9 @@ export class Litepicker extends Calendar {
     }
 
     for (let idx = 0; idx < (this.options.numberOfMonths || 1); idx += 1) {
-      const date = this.options.startDate ? (this.options.startDate as DateTime).clone() : new DateTime();
+      const date = this.options.startDate
+        ? (this.options.startDate as DateTime).clone()
+        : new DateTime();
       date.setDate(1);
       date.setMonth(date.getMonth() + idx);
       this.calendars[idx] = date;

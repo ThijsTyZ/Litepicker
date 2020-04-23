@@ -1,6 +1,6 @@
 export class DateTime {
 
-  public static parseDateTime(date: Date|DateTime|string|null,
+  public static parseDateTime(date: Date|DateTime|string|number|null,
                               format: string = 'YYYY-MM-DD',
                               lang: string = 'en-US'): Date {
     if (!date) return new Date(NaN);
@@ -8,7 +8,7 @@ export class DateTime {
     if (date instanceof Date) return new Date(date);
     if (date instanceof DateTime) return date.clone().getDateInstance();
 
-    if (/^-?\d{10,}$/.test(date)) return DateTime.getDateZeroTime(new Date(Number(date)));
+    if (/^-?\d{10,}$/.test(date as string)) return DateTime.getDateZeroTime(new Date(Number(date)));
 
     if (typeof date === 'string') {
       const match = format.match(/\[([^\]]+)]|Y{2,4}|M{1,4}|D{1,2}|d{1,4}/g);
@@ -122,7 +122,7 @@ export class DateTime {
 
   private dateInstance: Date;
 
-  constructor(date: Date|DateTime|string|null = null, format: string|null = null, lang: string = 'en-US') {
+  constructor(date: Date|DateTime|string|number|null = null, format: string|null = null, lang: string = 'en-US') {
     if (format) {
       this.dateInstance = (DateTime.parseDateTime(date, format, lang));
     } else if (date) {

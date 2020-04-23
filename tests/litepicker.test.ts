@@ -51,12 +51,14 @@ test('Litepicker singleMode - init with Date/UnixTimestamp/String', () => {
 test('Litepicker date range - init with Date/UnixTimestamp/String', () => {
   // Date object
   let picker = new Litepicker({
+    startDate,
+    endDate,
     element: document.getElementById('datepicker'),
-    startDate: startDate,
-    endDate: endDate,
   });
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate().toDateString() === endDate.toDateString()).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString(),
+  ).toBe(true);
   picker.destroy();
 
   // Unix timestamp
@@ -65,8 +67,10 @@ test('Litepicker date range - init with Date/UnixTimestamp/String', () => {
     startDate: startDate.getTime(),
     endDate: endDate.getTime(),
   });
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate()?.toDateString() === endDate.toDateString()).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString(),
+  ).toBe(true);
   picker.destroy();
 
   // String
@@ -79,8 +83,10 @@ test('Litepicker date range - init with Date/UnixTimestamp/String', () => {
     startDate: `${startDate.getFullYear()}-${monthStart}-${dayStart}`,
     endDate: `${endDate.getFullYear()}-${monthEnd}-${dayEnd}`,
   });
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate()?.toDateString() === endDate.toDateString()).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString(),
+  ).toBe(true);
   picker.destroy();
 });
 
@@ -94,8 +100,10 @@ test('Litepicker singleMode - setDate (Date/UnixTimestamp/String)', () => {
   const month = `0${startDate.getMonth() + 1}`.slice(-2);
   const day = `0${startDate.getDate()}`.slice(-2);
 
-  expect(picker.getDate()?.toDateString() === startDate.toDateString()
-    && input.value === `${startDate.getFullYear()}-${month}-${day}`).toBe(true);
+  expect(
+    picker.getDate()?.toDateString() === startDate.toDateString() &&
+      input.value === `${startDate.getFullYear()}-${month}-${day}`,
+  ).toBe(true);
   picker.destroy();
 
   // Unix timestamp
@@ -104,8 +112,10 @@ test('Litepicker singleMode - setDate (Date/UnixTimestamp/String)', () => {
   });
   picker.setDate(startDate.getTime());
 
-  expect(picker.getDate()?.toDateString() === startDate.toDateString()
-    && input.value === `${startDate.getFullYear()}-${month}-${day}`).toBe(true);
+  expect(
+    picker.getDate()?.toDateString() === startDate.toDateString() &&
+      input.value === `${startDate.getFullYear()}-${month}-${day}`,
+  ).toBe(true);
   picker.destroy();
 
   // String
@@ -115,8 +125,10 @@ test('Litepicker singleMode - setDate (Date/UnixTimestamp/String)', () => {
   const startDateFormat = `${startDate.getFullYear()}-${month}-${day}`;
   picker.setDate(startDateFormat);
 
-  expect(picker.getDate()?.toDateString() === startDate.toDateString()
-    && input.value === startDateFormat).toBe(true);
+  expect(
+    picker.getDate()?.toDateString() === startDate.toDateString() &&
+      input.value === startDateFormat,
+  ).toBe(true);
   picker.destroy();
 });
 
@@ -135,9 +147,11 @@ test('Litepicker date range - setDateRange (Date/UnixTimestamp/String)', () => {
   });
   picker.setDateRange(startDate, endDate);
 
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate()?.toDateString() === endDate.toDateString()
-    && input.value === `${startDateFormat} - ${endDateFormat}`).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString() &&
+      input.value === `${startDateFormat} - ${endDateFormat}`,
+  ).toBe(true);
   picker.destroy();
 
   // Unix timestamp
@@ -147,9 +161,11 @@ test('Litepicker date range - setDateRange (Date/UnixTimestamp/String)', () => {
   });
   picker.setDateRange(startDate.getTime(), endDate.getTime());
 
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate()?.toDateString() === endDate.toDateString()
-    && input.value === `${startDateFormat} - ${endDateFormat}`).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString() &&
+      input.value === `${startDateFormat} - ${endDateFormat}`,
+  ).toBe(true);
   picker.destroy();
 
   // String
@@ -159,8 +175,10 @@ test('Litepicker date range - setDateRange (Date/UnixTimestamp/String)', () => {
   });
   picker.setDateRange(startDateFormat, endDateFormat);
 
-  expect(picker.getStartDate()?.toDateString() === startDate.toDateString()
-    && picker.getEndDate()?.toDateString() === endDate.toDateString()
-    && input.value === `${startDateFormat} - ${endDateFormat}`).toBe(true);
+  expect(
+    picker.getStartDate()?.toDateString() === startDate.toDateString() &&
+      picker.getEndDate()?.toDateString() === endDate.toDateString() &&
+      input.value === `${startDateFormat} - ${endDateFormat}`,
+  ).toBe(true);
   picker.destroy();
 });

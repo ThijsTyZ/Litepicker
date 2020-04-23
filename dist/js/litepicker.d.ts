@@ -1,10 +1,13 @@
 import { Calendar, CalendarOptions } from './calendar';
-export { Calendar };
+export interface LitepickerOptions extends Omit<CalendarOptions, 'startDate' | 'endDate'> {
+    startDate?: Date | string | number;
+    endDate?: Date | string | number;
+}
 export declare class Litepicker extends Calendar {
     private triggerElement?;
     private backdrop;
     private readonly pluralSelector;
-    constructor(options: CalendarOptions);
+    constructor(options: LitepickerOptions);
     updateInput(): void;
     isShown(): boolean | null;
     private onInit;

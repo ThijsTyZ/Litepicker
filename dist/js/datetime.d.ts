@@ -1,11 +1,11 @@
 export declare class DateTime {
-    static parseDateTime(date: Date | DateTime | string | null, format?: string, lang?: string): Date;
+    static parseDateTime(date: Date | DateTime | string | number | null, format?: string, lang?: string): Date;
     static convertArray(array: Array<Date | Date[] | string | string[]>, format: string): Array<DateTime | DateTime[]>;
     static getDateZeroTime(date: Date): Date;
     private static readonly MONTH_JS;
     protected lang: string;
     private dateInstance;
-    constructor(date?: Date | DateTime | string | null, format?: string | null, lang?: string);
+    constructor(date?: Date | DateTime | string | number | null, format?: string | null, lang?: string);
     getDateInstance(): Date;
     toLocaleString(arg0: string, arg1: Intl.DateTimeFormatOptions): string;
     toDateString(): string;

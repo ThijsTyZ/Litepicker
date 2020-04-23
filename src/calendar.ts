@@ -3,7 +3,7 @@ import * as style from './scss/main.scss';
 import { findNestedMonthItem } from './utils';
 
 export interface CalendarOptions {
-  element?: HTMLInputElement | null;
+  element?: HTMLInputElement | HTMLElement | null;
   elementEnd?: HTMLInputElement | null;
   parentEl?: HTMLElement | string | null;
 

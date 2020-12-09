@@ -331,12 +331,12 @@ export class Calendar {
     }
 
     const previousMonthButton = document.createElement('a');
-    previousMonthButton.href = '#';
+    previousMonthButton.href = 'javascript: void(0);';
     previousMonthButton.className = style.buttonPreviousMonth;
     previousMonthButton.innerHTML = this.options.buttonText?.previousMonth || '';
 
     const nextMonthButton = document.createElement('a');
-    nextMonthButton.href = '#';
+    nextMonthButton.href = 'javascript: void(0);';
     nextMonthButton.className = style.buttonNextMonth;
     nextMonthButton.innerHTML = this.options.buttonText?.nextMonth || '';
 
@@ -417,7 +417,7 @@ export class Calendar {
 
   protected renderDay(date: DateTime) {
     const day = document.createElement('a');
-    day.href = '#';
+    day.href = 'javascript: void(0);';
     day.className = style.dayItem;
     day.innerHTML = String(date.getDate());
     day.dataset.time = String(date.getTime());
